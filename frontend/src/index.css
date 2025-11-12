@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.25s ease-out forwards;
+}
+
+/* index.css */
+html.dark {
+  background-color: #121212;
+  color: #fff;
+}
+html.light {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Default (light mode) */
+html {
+  background-color: #f9fafb; /* Tailwind gray-50 */
+  color: #111827; /* gray-900 */
+}
+
+/* Dark mode */
+html.dark {
+  background-color: #0f0f0f; /* Instagram-like dark */
+  color: #fafafa;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.fade-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+/* Hide scrollbars on stories */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

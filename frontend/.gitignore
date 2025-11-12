@@ -1,0 +1,72 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+
+# build output
+dist/
+.parcel-cache/
+
+# misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Mac system files
+Thumbs.db
+
+# eslint cache
+.eslintcache
+
+# local server files
+*.local
+
+# lock files (optional – if you want consistent deps, remove these lines)
+/package-lock.json
+/yarn.lock
+/pnpm-lock.yaml
+
+# temporary files
+*.tmp
+*.temp
+*.bak
+
+# Storybook build
+.out
+
+# Firebase cache
+.firebase/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional: Vite cache
+vite.config.ts.timestamp-*
+.vite
+
+# Optional
