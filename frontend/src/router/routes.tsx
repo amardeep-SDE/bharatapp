@@ -4,6 +4,7 @@ import MainLayout from "../layout/MainLayout";
 import Profile from "../pages/Profile.js";
 import Messages from "../pages/Messages.js";
 import SettingsPage from "../pages/SettingsPage.js";
+import Reels from "../pages/Reels.js";
 
 const HomeFeed = lazy(() => import("../pages/HomeFeed"));
 
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
         path: "/settings",
         element: <SettingsPage />,
       },
+       { path: "reels", element: <Reels /> }
     ],
   },
 ]);
