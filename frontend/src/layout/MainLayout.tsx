@@ -17,8 +17,9 @@ const MainLayout: React.FC = () => {
 
   // Sidebar collapsed if panel open or Messages route active
   // const isCollapsed = activePanel !== null || location.pathname === "/messages";
-  const isCollapsed = location.pathname === "/messages";
-
+  const isProfilePage = location.pathname === "/profile";
+const isMessagesPage = location.pathname === "/messages";
+const isCollapsed = activePanel !== null || isMessagesPage;
   return (
     <div
       className={`
@@ -34,20 +35,36 @@ const MainLayout: React.FC = () => {
       />
 
       {/* Main Content Area */}
-      <main
-        className={`
-          flex-1 transition-all duration-300
-          ${isCollapsed ? "lg:ml-[90px]" : "lg:ml-64 xl:mr-80"}
-          p-4
-        `}
-      >
+     <main
+  className={`
+    flex-1 transition-all duration-300
+    ${
+      isProfilePage
+        ? "lg:ml-64"                 // sidebar ke baad start
+        : isMessagesPage
+        ? "lg:ml-[90px]"
+        : "lg:ml-64 xl:mr-80"
+    }
+    px-4
+  `}
+>
+  {isProfilePage ? (
+    /* 🔥 INSTAGRAM STYLE CENTER CONTAINER */
+    <div className="flex justify-center">
+      <div className="w-full max-w-4xl">
         <Outlet />
-      </main>
+      </div>
+    </div>
+  ) : (
+    <Outlet />
+  )}
+</main>
+
 
       {/* ✅ Hide RightSidebar for Messages route or when panel open */}
       {/* {location.pathname !== "/messages" && !activePanel && <RightSidebar />} */}
-      {location.pathname !== "/messages" && <RightSidebar />}
-
+      {location.pathname !== "/messages" &&
+        location.pathname !== "/profile" && <RightSidebar />}
     </div>
   );
 };
