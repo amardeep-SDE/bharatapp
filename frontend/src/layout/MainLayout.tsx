@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import LeftSidebar from "../components/LeftSidebar";
 import RightSidebar from "../components/RightSidebar";
+import FloatingMessages from "../components/FloatingMessages.js";
 
 const MainLayout: React.FC = () => {
   const [activePanel, setActivePanel] = useState<string | null>(null);
@@ -65,6 +66,7 @@ const isCollapsed = activePanel !== null || isMessagesPage;
       {/* {location.pathname !== "/messages" && !activePanel && <RightSidebar />} */}
       {location.pathname !== "/messages" &&
         location.pathname !== "/profile" && <RightSidebar />}
+        <FloatingMessages/>
     </div>
   );
 };
