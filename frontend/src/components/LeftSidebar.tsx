@@ -14,6 +14,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import SearchPanel from "./SearchPanel";
 import NotificationsPanel from "./NotificationsPanel";
 import MoreMenu from "./MoreMenu";
+import CreateModal from "./CreateModal";
 
 interface LeftSidebarProps {
   activePanel: string | null;
@@ -30,6 +31,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
   const navigate = useNavigate();
 
   const [openMore, setOpenMore] = useState(false);
+const [openCreate, setOpenCreate] = useState(false);
 
   const togglePanel = (panel: string) => {
     if (activePanel === panel) onClosePanel();
@@ -119,14 +121,15 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
             <Heart size={22} /> {!isCollapsed && "Notifications"}
           </button>
 
-          <button
-            onClick={() => togglePanel("create")}
-            className={`flex items-center gap-3 p-2 w-full rounded-lg justify-center sm:justify-start hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 transition ${
-              activePanel === "create" ? "bg-gray-100 dark:bg-gray-800" : ""
-            }`}
-          >
-            <PlusSquare size={22} /> {!isCollapsed && "Create"}
-          </button>
+        <button
+  onClick={() => setOpenCreate(true)}
+  className={`flex items-center gap-3 p-2 w-full rounded-lg
+    justify-center sm:justify-start hover:bg-gray-100 dark:hover:bg-gray-800
+    text-gray-800 dark:text-gray-200 transition`}
+>
+  <PlusSquare size={22} /> {!isCollapsed && "Create"}
+</button>
+
 
           <NavLink
             to="/profile"
@@ -162,6 +165,11 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
         onClose={onClosePanel}
         sidebarWidth={isCollapsed ? 80 : 256}
       />
+      <CreateModal
+  open={openCreate}
+  onClose={() => setOpenCreate(false)}
+/>
+
     </>
   );
 };
