@@ -1,17 +1,18 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
+import authRoutes from "./modules/auth/auth.routes.js";
 
 const app = express();
 
-// ---------- Middlewares ----------
 app.use(cors());
 app.use(express.json());
 
-// ---------- Health Check ----------
-app.get("/", (_req: Request, res: Response) => {
-  res.status(200).json({
+app.use("/api/auth", authRoutes);
+
+app.get("/", (_req, res) => {
+  res.json({
     success: true,
-    message: "🚀 BharatGram Backend API running (ESM)",
+    message: "🚀 BharatGram Backend API running",
   });
 });
 
