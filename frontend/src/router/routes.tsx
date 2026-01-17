@@ -7,8 +7,15 @@ import SettingsPage from "../pages/SettingsPage.js";
 import Reels from "../pages/Reels.js";
 
 const HomeFeed = lazy(() => import("../pages/HomeFeed"));
-
+const Register = lazy(() => import("../pages/Register"));
 export const router = createBrowserRouter([
+  // 🔓 Public routes (no layout)
+  {
+    path: "/register",
+    element: <Register />,
+  },
+
+  // 🔐 App routes (with layout)
   {
     path: "/",
     element: <MainLayout />,
@@ -16,11 +23,9 @@ export const router = createBrowserRouter([
       { index: true, element: <HomeFeed /> },
       { path: "profile", element: <Profile /> },
       { path: "messages", element: <Messages /> },
-      {
-        path: "/settings",
-        element: <SettingsPage />,
-      },
-       { path: "reels", element: <Reels /> }
+      { path: "reels", element: <Reels /> },
+      { path: "settings", element: <SettingsPage /> },
     ],
   },
 ]);
+
