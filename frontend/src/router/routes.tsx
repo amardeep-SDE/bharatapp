@@ -5,11 +5,16 @@ import Profile from "../pages/Profile.js";
 import Messages from "../pages/Messages.js";
 import SettingsPage from "../pages/SettingsPage.js";
 import Reels from "../pages/Reels.js";
+import Login from "../pages/Login.js";
 
 const HomeFeed = lazy(() => import("../pages/HomeFeed"));
 const Register = lazy(() => import("../pages/Register"));
 export const router = createBrowserRouter([
   // 🔓 Public routes (no layout)
+  {
+    path: "/login",
+    element: <Login />,
+  },
   {
     path: "/register",
     element: <Register />,
@@ -28,4 +33,3 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
-
