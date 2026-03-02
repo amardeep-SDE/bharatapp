@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -30,10 +30,8 @@ const Register: React.FC = () => {
         form
       );
 
-      // token save (later redux me jayega)
       localStorage.setItem("token", res.data.token);
-
-      navigate("/"); // home
+      navigate("/");
     } catch (err: any) {
       setError(err.response?.data?.message || "Registration failed");
     } finally {
@@ -42,59 +40,76 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4"
-      >
-        <h2 className="text-xl font-bold text-center">Create Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black transition-colors">
+      <div className="w-full max-w-sm space-y-4">
 
-        {error && (
-          <p className="text-sm text-red-500 text-center">{error}</p>
-        )}
+        <div className="bg-white dark:bg-[#121212] border border-gray-300 dark:border-gray-700 p-8 text-center">
 
-        <input
-          name="fullName"
-          placeholder="Full Name"
-          className="w-full p-2 border rounded"
-          onChange={handleChange}
-          required
-        />
+          <h1 className="text-3xl font-semibold mb-4 tracking-wide">
+            BharatGram
+          </h1>
 
-        <input
-          name="username"
-          placeholder="Username"
-          className="w-full p-2 border rounded"
-          onChange={handleChange}
-          required
-        />
+          <p className="text-sm text-gray-500 mb-6">
+            Sign up to see photos and videos from your friends.
+          </p>
 
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 border rounded"
-          onChange={handleChange}
-          required
-        />
+          {error && (
+            <p className="text-sm text-red-500 mb-4">{error}</p>
+          )}
 
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 border rounded"
-          onChange={handleChange}
-          required
-        />
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              name="fullName"
+              placeholder="Full Name"
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 text-sm border rounded bg-gray-50 dark:bg-[#1e1e1e] dark:border-gray-600 outline-none"
+            />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          {loading ? "Creating..." : "Register"}
-        </button>
-      </form>
+            <input
+              name="username"
+              placeholder="Username"
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 text-sm border rounded bg-gray-50 dark:bg-[#1e1e1e] dark:border-gray-600 outline-none"
+            />
+
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 text-sm border rounded bg-gray-50 dark:bg-[#1e1e1e] dark:border-gray-600 outline-none"
+            />
+
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 text-sm border rounded bg-gray-50 dark:bg-[#1e1e1e] dark:border-gray-600 outline-none"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-500 text-white py-2 rounded font-semibold hover:bg-blue-600 transition"
+            >
+              {loading ? "Signing up..." : "Sign up"}
+            </button>
+          </form>
+        </div>
+
+        <div className="bg-white dark:bg-[#121212] border border-gray-300 dark:border-gray-700 p-4 text-center text-sm">
+          Have an account?{" "}
+          <Link to="/login" className="text-blue-500 font-semibold">
+            Log in
+          </Link>
+        </div>
+
+      </div>
     </div>
   );
 };
