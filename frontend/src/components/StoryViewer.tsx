@@ -12,57 +12,93 @@ const StoryViewer: React.FC<Props> = ({
   activeIndex,
   setActiveIndex,
 }) => {
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const [progress, setProgress] = useState(0);
 
-  // ❗ safety check
-  if (
-    activeIndex === null ||
-    activeIndex === undefined ||
-    !stories ||
-    !stories[activeIndex]
-  ) {
-    return null;
-  }
+  const story =
+    activeIndex !== null && stories ? stories[activeIndex] : null;
 
-  const story = stories[activeIndex];
+  /* AUTO PROGRESS */
 
-  // AUTO PROGRESS
   useEffect(() => {
+
+    if (!story) return;
+
     setProgress(0);
+
+    if (story.type === "video") return;
 
     const interval = setInterval(() => {
       setProgress((prev) => prev + 2);
     }, 100);
 
     return () => clearInterval(interval);
-  }, [activeIndex]);
 
-  // NEXT STORY
+  }, [activeIndex, story]);
+
+
+  /* VIDEO PROGRESS */
+
   useEffect(() => {
+
+    if (!story || story.type !== "video") return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    const update = () => {
+      const value = (video.currentTime / video.duration) * 100;
+      setProgress(value);
+    };
+
+    video.addEventListener("timeupdate", update);
+
+    return () => {
+      video.removeEventListener("timeupdate", update);
+    };
+
+  }, [story]);
+
+
+  /* NEXT STORY */
+
+  useEffect(() => {
+
+    if (!story) return;
+
     if (progress >= 100) {
-      if (activeIndex < stories.length - 1) {
-        setActiveIndex(activeIndex + 1);
+
+      if (activeIndex! < stories.length - 1) {
+        setActiveIndex(activeIndex! + 1);
       } else {
         setActiveIndex(null);
       }
+
     }
-  }, [progress]);
+
+  }, [progress, story]);
+
 
   const nextStory = () => {
-    if (activeIndex < stories.length - 1) {
+    if (activeIndex !== null && activeIndex < stories.length - 1) {
       setActiveIndex(activeIndex + 1);
     }
   };
 
   const prevStory = () => {
-    if (activeIndex > 0) {
+    if (activeIndex !== null && activeIndex > 0) {
       setActiveIndex(activeIndex - 1);
     }
   };
 
+
+  if (!story) return null;
+
+
   return (
     <div className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center">
+
       {/* CLOSE */}
       <button
         className="absolute top-6 right-8 text-white"
@@ -71,66 +107,90 @@ const StoryViewer: React.FC<Props> = ({
         <X size={32} />
       </button>
 
+
       {/* STORY CARD */}
       <div className="relative w-[380px] h-[680px] rounded-xl overflow-hidden bg-black">
 
+
         {/* PROGRESS BARS */}
         <div className="absolute top-3 left-3 right-3 flex gap-1 z-10">
+
           {stories.map((_, i) => (
             <div key={i} className="flex-1 h-[3px] bg-white/30">
+
               <div
                 className="h-full bg-white transition-all"
                 style={{
                   width:
-                    i < activeIndex
+                    i < activeIndex!
                       ? "100%"
                       : i === activeIndex
                       ? `${progress}%`
                       : "0%",
                 }}
               />
+
             </div>
           ))}
+
         </div>
+
 
         {/* USER INFO */}
         <div className="absolute top-6 left-4 flex items-center gap-3 text-white z-10">
+
           <img src={story.avatar} className="w-9 h-9 rounded-full" />
-          <p className="text-sm font-semibold">{story.user}</p>
+
+          <p className="text-sm font-semibold">
+            {story.user}
+          </p>
+
         </div>
 
+
         {/* MEDIA */}
+
         {story.type === "video" ? (
+
           <video
             ref={videoRef}
             src={story.url}
             autoPlay
             muted
+            playsInline
             className="w-full h-full object-cover"
           />
+
         ) : (
+
           <img
             src={story.url}
             className="w-full h-full object-cover"
           />
+
         )}
 
-        {/* TAP AREAS */}
+
+        {/* TAP LEFT */}
         <div
           onClick={prevStory}
           className="absolute left-0 top-0 w-1/2 h-full"
         />
 
+        {/* TAP RIGHT */}
         <div
           onClick={nextStory}
           className="absolute right-0 top-0 w-1/2 h-full"
         />
 
+
         {/* SEEN */}
         <div className="absolute bottom-4 left-4 text-white text-sm">
-          👀 Seen by {story.seenBy}
+          👀 Seen by {story.seenBy ?? 0}
         </div>
+
       </div>
+
     </div>
   );
 };
