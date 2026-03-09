@@ -10,6 +10,7 @@ import {
 
 const Profile: React.FC = () => {
   const [activeTab, setActiveTab] = useState("posts");
+  const [openSettings, setOpenSettings] = useState(false);
 
   const tabs = [
     { id: "posts", icon: <Grid size={18} />, label: "Posts" },
@@ -26,9 +27,9 @@ const Profile: React.FC = () => {
     "चाचा/मामा",
     "माँ",
     "Trips",
-    "Memories",
-    "Office",
     "Friends",
+    "Office",
+    "Memories",
   ];
 
   const posts = Array.from({ length: 12 }).map((_, i) => ({
@@ -38,6 +39,7 @@ const Profile: React.FC = () => {
 
   return (
     <section className="max-w-5xl mx-auto px-4 pt-6 pb-10 text-gray-900 dark:text-gray-100">
+
       {/* PROFILE HEADER */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
 
@@ -50,7 +52,7 @@ const Profile: React.FC = () => {
             className="w-36 h-36 rounded-full object-cover border border-gray-300 dark:border-gray-700"
           />
 
-          {/* NOTE BUBBLE */}
+          {/* Note Bubble */}
           <div className="absolute -top-3 left-24 bg-gray-800 text-white text-xs px-3 py-1 rounded-full">
             Note...
           </div>
@@ -68,7 +70,11 @@ const Profile: React.FC = () => {
             </h2>
 
             {/* SETTINGS ICON */}
-            <Settings size={20} className="cursor-pointer" />
+            <Settings
+              size={20}
+              className="cursor-pointer"
+              onClick={() => setOpenSettings(true)}
+            />
 
             <button className="bg-gray-100 dark:bg-gray-800 px-4 py-1 rounded-md text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700">
               Edit Profile
@@ -167,6 +173,48 @@ const Profile: React.FC = () => {
           />
         ))}
       </div>
+
+      {/* SETTINGS MODAL */}
+
+      {openSettings && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+          onClick={() => setOpenSettings(false)}
+        >
+          <div
+            className="bg-gray-900 text-white w-[420px] rounded-xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            {[
+              "Apps and websites",
+              "QR code",
+              "Notifications",
+              "Settings and privacy",
+              "Meta Verified",
+              "Supervision",
+              "Login activity",
+              "Log Out",
+            ].map((item, i) => (
+              <button
+                key={i}
+                className="w-full py-4 border-b border-gray-700 hover:bg-gray-800 transition"
+              >
+                {item}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setOpenSettings(false)}
+              className="w-full py-4 hover:bg-gray-800"
+            >
+              Cancel
+            </button>
+
+          </div>
+        </div>
+      )}
+
     </section>
   );
 };
