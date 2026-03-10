@@ -1,14 +1,9 @@
 import React, { useState } from "react";
-import {
-  Grid,
-  Film,
-  Bookmark,
-  User,
-  Settings,
-  PlusCircle,
-} from "lucide-react";
+import { Grid, Film, Bookmark, User, Settings, PlusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("posts");
   const [openSettings, setOpenSettings] = useState(false);
 
@@ -39,13 +34,10 @@ const Profile: React.FC = () => {
 
   return (
     <section className="max-w-5xl mx-auto px-4 pt-6 pb-10 text-gray-900 dark:text-gray-100">
-
       {/* PROFILE HEADER */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
-
         {/* Avatar */}
         <div className="relative">
-
           <img
             src="https://i.pravatar.cc/200?u=amardeep"
             alt="profile"
@@ -56,18 +48,13 @@ const Profile: React.FC = () => {
           <div className="absolute -top-3 left-24 bg-gray-800 text-white text-xs px-3 py-1 rounded-full">
             Note...
           </div>
-
         </div>
 
         {/* USER INFO */}
         <div className="flex-1">
-
           {/* Username */}
           <div className="flex items-center gap-3 mb-4">
-
-            <h2 className="text-2xl font-semibold">
-              10_amardeep_16
-            </h2>
+            <h2 className="text-2xl font-semibold">10_amardeep_16</h2>
 
             {/* SETTINGS ICON */}
             <Settings
@@ -76,14 +63,16 @@ const Profile: React.FC = () => {
               onClick={() => setOpenSettings(true)}
             />
 
-            <button className="bg-gray-100 dark:bg-gray-800 px-4 py-1 rounded-md text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700">
+            <button
+              onClick={() => navigate("/settings")}
+              className="bg-gray-100 dark:bg-gray-800 px-4 py-1 rounded-md text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
               Edit Profile
             </button>
 
             <button className="bg-gray-100 dark:bg-gray-800 px-4 py-1 rounded-md text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700">
               View Archive
             </button>
-
           </div>
 
           {/* Stats */}
@@ -105,7 +94,6 @@ const Profile: React.FC = () => {
             <p>@engineer 💡</p>
             <p>#16_june 🎂 · 🇮🇳 भारत · ❤️ healthHelpline</p>
           </div>
-
         </div>
       </div>
 
@@ -113,7 +101,6 @@ const Profile: React.FC = () => {
 
       <div className="mt-10 overflow-x-auto">
         <div className="flex gap-6 min-w-max">
-
           {/* ADD STORY */}
           <div className="flex flex-col items-center text-xs cursor-pointer">
             <div className="w-20 h-20 rounded-full border border-gray-400 flex items-center justify-center">
@@ -134,9 +121,7 @@ const Profile: React.FC = () => {
                 />
               </div>
 
-              <p className="mt-1 w-20 text-center truncate">
-                {title}
-              </p>
+              <p className="mt-1 w-20 text-center truncate">{title}</p>
             </div>
           ))}
         </div>
@@ -185,7 +170,6 @@ const Profile: React.FC = () => {
             className="bg-gray-900 text-white w-[420px] rounded-xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-
             {[
               "Apps and websites",
               "QR code",
@@ -210,11 +194,9 @@ const Profile: React.FC = () => {
             >
               Cancel
             </button>
-
           </div>
         </div>
       )}
-
     </section>
   );
 };

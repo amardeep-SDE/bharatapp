@@ -94,40 +94,44 @@ const SettingsPage: React.FC = () => {
       {/* Right Content Panel */}
       <div
         className="
-          flex-1 overflow-y-auto p-8
-          bg-white dark:bg-[#121212]
-          transition-colors duration-300
+          flex-1 overflow-y-auto
+    bg-white dark:bg-[#121212]
+    transition-colors duration-300
+    flex justify-center
         "
       >
-        {activeSection === "Edit profile" && (
-          <div className="max-w-2xl">
-            <h2 className="text-xl font-semibold mb-6">Edit Profile</h2>
+        <div className="w-full max-w-xl p-8">
+          {activeSection === "Edit profile" && (
+           <div className="w-full">
+              <h2 className="text-xl font-semibold mb-6">Edit Profile</h2>
 
-            {/* Profile Info */}
-            <div className="flex items-center gap-4 mb-6">
-              <img
-                src="https://i.pravatar.cc/100?u=amardeep"
-                alt="profile"
-                className="w-20 h-20 rounded-full object-cover border border-gray-300 dark:border-gray-700"
-              />
-              <div>
-                <h3 className="font-semibold text-lg">10_amardeep_16</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  अमरदीप द्विवेदी
-                </p>
-                <button className="text-sm text-blue-600 dark:text-blue-400 font-medium mt-1">
-                  Change photo
-                </button>
+              {/* Profile Info */}
+              <div className="flex items-center gap-4 mb-6">
+                <img
+                  src="https://i.pravatar.cc/100?u=amardeep"
+                  alt="profile"
+                  className="w-20 h-20 rounded-full object-cover border border-gray-300 dark:border-gray-700"
+                />
+                <div>
+                  <h3 className="font-semibold text-lg">10_amardeep_16</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    अमरदीप द्विवेदी
+                  </p>
+                  <button className="text-sm text-blue-600 dark:text-blue-400 font-medium mt-1">
+                    Change photo
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Website */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium mb-1">Website</label>
-              <input
-                type="text"
-                placeholder="Website"
-                className="
+              {/* Website */}
+              <div className="mb-5">
+                <label className="block text-sm font-medium mb-1">
+                  Website
+                </label>
+                <input
+                  type="text"
+                  placeholder="Website"
+                  className="
                   w-full p-2 border rounded-md outline-none
                   bg-gray-100 dark:bg-gray-800
                   border-gray-300 dark:border-gray-700
@@ -135,19 +139,19 @@ const SettingsPage: React.FC = () => {
                   placeholder-gray-500 dark:placeholder-gray-400
                   transition-colors
                 "
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Editing your links is only available on mobile.
-              </p>
-            </div>
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Editing your links is only available on mobile.
+                </p>
+              </div>
 
-            {/* Bio */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium mb-1">Bio</label>
-              <textarea
-                rows={3}
-                placeholder="Add bio..."
-                className="
+              {/* Bio */}
+              <div className="mb-5">
+                <label className="block text-sm font-medium mb-1">Bio</label>
+                <textarea
+                  rows={3}
+                  placeholder="Add bio..."
+                  className="
                   w-full p-2 border rounded-md outline-none
                   bg-gray-100 dark:bg-gray-800
                   border-gray-300 dark:border-gray-700
@@ -155,47 +159,48 @@ const SettingsPage: React.FC = () => {
                   placeholder-gray-500 dark:placeholder-gray-400
                   transition-colors
                 "
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                137 / 150
-              </p>
-            </div>
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  137 / 150
+                </p>
+              </div>
 
-            {/* Gender */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium mb-1">Gender</label>
-              <select
-                className="
+              {/* Gender */}
+              <div className="mb-5">
+                <label className="block text-sm font-medium mb-1">Gender</label>
+                <select
+                  className="
                   w-full p-2 border rounded-md outline-none
                   bg-gray-100 dark:bg-gray-800
                   border-gray-300 dark:border-gray-700
                   text-gray-900 dark:text-gray-200
                   transition-colors
                 "
-              >
-                <option>Male</option>
-                <option>Female</option>
-                <option>Custom</option>
-              </select>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                This won’t be part of your public profile.
-              </p>
+                >
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Custom</option>
+                </select>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  This won’t be part of your public profile.
+                </p>
+              </div>
+
+              {/* Save Button */}
+              <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-md transition">
+                Submit
+              </button>
             </div>
+          )}
 
-            {/* Save Button */}
-            <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-md transition">
-              Submit
-            </button>
-          </div>
-        )}
-
-        {/* Other Sections Placeholder */}
-        {activeSection !== "Edit profile" && (
-          <div className="text-gray-500 dark:text-gray-400 text-center mt-32">
-            <Settings className="mx-auto mb-3" size={28} />
-            <p>{activeSection} settings coming soon...</p>
-          </div>
-        )}
+          {/* Other Sections Placeholder */}
+          {activeSection !== "Edit profile" && (
+            <div className="text-gray-500 dark:text-gray-400 text-center mt-32">
+              <Settings className="mx-auto mb-3" size={28} />
+              <p>{activeSection} settings coming soon...</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
