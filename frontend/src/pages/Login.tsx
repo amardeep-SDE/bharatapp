@@ -1,97 +1,97 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const Login: React.FC = () => {
+const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    console.log(email, password);
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        form
-      );
-
-      localStorage.setItem("token", res.data.token);
-      navigate("/");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
+    // after login
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black transition-colors">
-      <div className="w-full max-w-sm space-y-4">
+    <div className="min-h-screen flex items-center justify-center bg-black text-white">
 
-        {/* Card */}
-        <div className="bg-white dark:bg-[#121212] border border-gray-300 dark:border-gray-700 p-8 text-center">
+      <div className="w-full max-w-md">
 
-          <h1 className="text-3xl font-semibold mb-6 tracking-wide">
+        {/* Login Card */}
+        <div className="bg-[#121212] border border-gray-800 rounded-xl p-8 shadow-lg">
+
+          <h1 className="text-3xl font-bold text-center mb-6 text-blue-500">
             BharatGram
           </h1>
 
-          {error && (
-            <p className="text-sm text-red-500 mb-4">{error}</p>
-          )}
+          <form onSubmit={handleLogin} className="space-y-4">
 
-          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Email */}
             <input
-              name="email"
               type="email"
               placeholder="Email"
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 text-sm border rounded bg-gray-50 dark:bg-[#1e1e1e] dark:border-gray-600 outline-none"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="
+                w-full px-4 py-2 rounded-md
+                bg-[#1a1a1a]
+                border border-gray-700
+                focus:outline-none focus:border-blue-500
+                placeholder-gray-400
+              "
             />
 
+            {/* Password */}
             <input
-              name="password"
               type="password"
               placeholder="Password"
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 text-sm border rounded bg-gray-50 dark:bg-[#1e1e1e] dark:border-gray-600 outline-none"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="
+                w-full px-4 py-2 rounded-md
+                bg-[#1a1a1a]
+                border border-gray-700
+                focus:outline-none focus:border-blue-500
+                placeholder-gray-400
+              "
             />
 
+            {/* Login Button */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-blue-500 text-white py-2 rounded font-semibold hover:bg-blue-600 transition"
+              className="
+                w-full py-2 rounded-md
+                bg-blue-600 hover:bg-blue-700
+                font-semibold transition
+              "
             >
-              {loading ? "Logging in..." : "Log in"}
+              Log in
             </button>
+
           </form>
+
         </div>
 
-        {/* Bottom link */}
-        <div className="bg-white dark:bg-[#121212] border border-gray-300 dark:border-gray-700 p-4 text-center text-sm">
-          Don’t have an account?{" "}
-          <Link to="/register" className="text-blue-500 font-semibold">
-            Sign up
-          </Link>
+        {/* Signup Card */}
+        <div className="bg-[#121212] border border-gray-800 rounded-xl p-4 mt-4 text-center">
+          <p className="text-gray-400">
+            Don't have an account?{" "}
+            <span
+              onClick={() => navigate("/signup")}
+              className="text-blue-500 cursor-pointer font-semibold"
+            >
+              Sign up
+            </span>
+          </p>
         </div>
 
       </div>
+
     </div>
   );
 };
 
-export default Login;
+export default LoginPage;
