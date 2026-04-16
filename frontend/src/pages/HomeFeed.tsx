@@ -1,96 +1,100 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import StoryViewer from "../components/StoryViewer";
-
-interface Story {
-  id: number;
-  user: string;
-  avatar: string;
-  type: "image";
-  url: string;
-  seenBy: number;
-}
 
 const HomeFeed: React.FC = () => {
 
-  // ✅ Memoized stories (har render pe recreate nahi honge)
-  const stories: Story[] = useMemo(
-    () =>
-      Array.from({ length: 10 }).map((_, i) => ({
-        id: i,
-        user: `user_${i}`,
-        avatar: `https://i.pravatar.cc/80?u=${i}`,
-        type: "image",
-        url: `https://picsum.photos/seed/story${i}/800/1200`,
-        seenBy: Math.floor(Math.random() * 50),
-      })),
-    []
-  );
+  const stories = Array.from({ length: 10 }).map((_, i) => ({
+    id: i,
+    user: `user_${i}`,
+    avatar: `https://i.pravatar.cc/80?u=${i}`,
+    type: "image",
+    url: `https://picsum.photos/seed/story${i}/800/1200`,
+    seenBy: Math.floor(Math.random() * 50)
+  }));
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <>
-      <section className="max-w-xl mx-auto w-full text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      <section
+        className="
+          max-w-xl mx-auto w-full
+          text-gray-900 dark:text-gray-100
+          transition-colors duration-300
+        "
+      >
 
-        {/* 🔥 STORIES */}
-        <div className="flex gap-4 overflow-x-auto p-3 mb-6 rounded-lg border bg-white dark:bg-[#121212] border-gray-200 dark:border-gray-800 scrollbar-hide">
+        {/* STORIES */}
+        <div
+          className="
+            flex gap-4 overflow-x-auto p-3 mb-6 rounded-lg border
+            bg-white dark:bg-[#121212]
+            border-gray-200 dark:border-gray-800
+            scrollbar-hide
+          "
+        >
 
           {stories.map((story, index) => (
-            <button
+
+            <div
               key={story.id}
               onClick={() => setActiveIndex(index)}
-              className="flex flex-col items-center text-xs focus:outline-none"
+              className="flex flex-col items-center text-xs cursor-pointer"
             >
+
               <img
                 src={story.avatar}
-                alt={story.user}
-                loading="lazy"
-                className="w-16 h-16 rounded-full border-2 border-pink-500 p-[2px] hover:scale-105 transition-transform"
+                className="
+                  w-16 h-16 rounded-full border-2 border-pink-500 p-[2px]
+                  hover:scale-105 transition-transform
+                "
               />
 
               <p className="truncate w-16 text-center mt-1">
                 {story.user}
               </p>
-            </button>
+
+            </div>
+
           ))}
 
         </div>
 
 
-        {/* 🔥 POSTS */}
+        {/* POSTS */}
         <div className="space-y-6">
 
           {Array.from({ length: 3 }).map((_, i) => (
+
             <article
               key={i}
-              className="rounded-lg shadow-sm border bg-white dark:bg-[#121212] border-gray-200 dark:border-gray-800 overflow-hidden"
+              className="
+                rounded-lg shadow-sm border
+                bg-white dark:bg-[#121212]
+                border-gray-200 dark:border-gray-800
+              "
             >
 
-              {/* HEADER */}
               <header className="flex items-center gap-3 p-3 border-b border-gray-100 dark:border-gray-800">
+
                 <img
                   src={`https://i.pravatar.cc/150?u=${i}`}
-                  alt={`user_${i}`}
-                  loading="lazy"
                   className="w-10 h-10 rounded-full"
                 />
 
                 <span className="font-semibold text-sm">
                   user_{i}
                 </span>
+
               </header>
 
 
-              {/* POST IMAGE */}
               <img
                 src={`https://picsum.photos/seed/${i}/800/800`}
-                alt="post"
-                loading="lazy"
                 className="w-full object-cover max-h-[600px]"
               />
 
 
-              {/* CONTENT */}
               <div className="p-3 text-sm">
 
                 <p>
@@ -108,6 +112,7 @@ const HomeFeed: React.FC = () => {
               </div>
 
             </article>
+
           ))}
 
         </div>
@@ -115,12 +120,13 @@ const HomeFeed: React.FC = () => {
       </section>
 
 
-      {/* 🔥 STORY VIEWER */}
+      {/* STORY VIEWER */}
       <StoryViewer
         stories={stories}
         activeIndex={activeIndex}
         setActiveIndex={setActiveIndex}
       />
+
     </>
   );
 };
