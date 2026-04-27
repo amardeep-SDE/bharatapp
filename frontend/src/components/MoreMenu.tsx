@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../context/ThemeContext"; // <-- added
+import { useTheme } from "../context/ThemeContext";
 
 interface Props {
   open: boolean;
@@ -18,7 +18,7 @@ interface Props {
 }
 
 const MoreMenu: React.FC<Props> = ({ open, onClose }) => {
-  const { darkMode, toggleTheme } = useTheme(); // <-- global hook
+  const { darkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   if (!open) return null;
@@ -56,30 +56,52 @@ const MoreMenu: React.FC<Props> = ({ open, onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-transparent" onClick={onClose}></div>
-
+      {/* Overlay */}
       <div
-        className={`absolute left-24 bottom-20 ${
-          darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-800"
-        } shadow-lg rounded-xl w-64 border z-50 animate-fadeIn`}
+        className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+
+      {/* Menu */}
+      <div
+        className={`absolute left-24 bottom-20 z-50 w-64 rounded-2xl border shadow-2xl overflow-hidden animate-fadeIn
+        ${
+          darkMode
+            ? "bg-gray-950/95 border-gray-800 text-white"
+            : "bg-white/95 border-gray-200 text-gray-800"
+        } backdrop-blur-xl`}
       >
         {menuItems.map((item, index) =>
           item.divider ? (
-            <hr
+            <div
               key={index}
-              className={`${darkMode ? "border-gray-700" : "border-gray-200"} my-1`}
+              className={`mx-3 my-2 border-t ${
+                darkMode ? "border-gray-800" : "border-gray-200"
+              }`}
             />
           ) : (
             <button
               key={index}
-              className={`flex items-center gap-3 w-full px-4 py-2 text-sm ${
-                darkMode
-                  ? "hover:bg-gray-800 text-gray-200"
-                  : "hover:bg-gray-100 text-gray-800"
-              } transition-colors duration-200`}
               onClick={() => handleAction(item.label)}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl mx-1 my-0.5 transition-all duration-200
+              ${
+                item.label === "Log out"
+                  ? darkMode
+                    ? "text-red-400 hover:bg-red-500/10"
+                    : "text-red-600 hover:bg-red-50"
+                  : darkMode
+                  ? "text-gray-200 hover:bg-gray-800"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
             >
-              {item.icon}
+              <span
+                className={`p-2 rounded-lg ${
+                  darkMode ? "bg-gray-800" : "bg-gray-100"
+                }`}
+              >
+                {item.icon}
+              </span>
+
               <span>{item.label}</span>
             </button>
           )
