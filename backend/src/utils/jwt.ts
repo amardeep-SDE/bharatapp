@@ -5,3 +5,11 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 export const generateToken = (payload: object): string => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 };
+
+export interface JwtPayload {
+  id: string;
+}
+
+export const verifyToken = (token: string): JwtPayload => {
+  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+};
