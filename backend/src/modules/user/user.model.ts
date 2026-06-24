@@ -1,8 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-/**
- * User Interface (TypeScript)
- */
 export interface IUser extends Document {
   username: string;
   email: string;
@@ -15,9 +12,6 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
-/**
- * User Schema
- */
 const userSchema = new Schema<IUser>(
   {
     username: {
@@ -41,7 +35,7 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
       minlength: 6,
-      select: false, // 🔐 password kabhi by default return nahi hoga
+      select: false,
     },
 
     fullName: {
@@ -67,13 +61,10 @@ const userSchema = new Schema<IUser>(
     },
   },
   {
-    timestamps: true, // createdAt & updatedAt
+    timestamps: true,
   }
 );
 
-/**
- * Model
- */
 const User = mongoose.model<IUser>("User", userSchema);
 
 export default User;

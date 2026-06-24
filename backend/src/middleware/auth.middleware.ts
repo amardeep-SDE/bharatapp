@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import User, { IUser } from "../modules/auth/user.model.js";
+import User, { IUser } from "../modules/user/user.model.js";
 import { verifyToken } from "../utils/jwt.js";
 
 declare global {
