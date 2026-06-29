@@ -1,5 +1,4 @@
 import express from "express";
-// @ts-ignore: No types for 'cors' installed
 import cors from "cors";
 import authRoutes from "./modules/auth/auth.routes.js";
 import userRoutes from "./modules/user/user.routes.js";
