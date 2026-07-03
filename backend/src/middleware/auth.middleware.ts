@@ -2,6 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import User, { IUser } from "../modules/user/user.model.js";
 import { verifyToken } from "../utils/jwt.js";
 
+const BEARER_PREFIX = "Bearer ";
+const AUTH_USER_FIELDS =
+  "_id username email fullName avatar bio isVerified createdAt updatedAt";
+
 declare global {
   namespace Express {
     interface Request {
@@ -15,19 +19,21 @@ export const protect = async (
   res: Response,
   next: NextFunction
 ) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith(BEARER_PREFIX)
+    ? authHeader.slice(BEARER_PREFIX.length).trim()
+    : "";
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: "Not authorized, token missing",
+    });
+  }
+
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized, token missing",
-      });
-    }
-
-    const token = authHeader.split(" ")[1];
     const decoded = verifyToken(token);
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select(AUTH_USER_FIELDS);
 
     if (!user) {
       return res.status(401).json({
@@ -37,9 +43,9 @@ export const protect = async (
     }
 
     req.user = user;
-    next();
-  } catch (error) {
-    res.status(401).json({
+    return next();
+  } catch {
+    return res.status(401).json({
       success: false,
       message: "Not authorized, token invalid",
     });
