@@ -1,196 +1,162 @@
-import React, { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+  type SyntheticEvent,
+} from "react";
 import { X } from "lucide-react";
 
-interface Props {
-  stories: any[];
-  activeIndex: number | null;
-  setActiveIndex: (i: number | null) => void;
+const IMAGE_DURATION = 5_000;
+
+interface Story {
+  id?: string | number;
+  user: string;
+  avatar: string;
+  type: string;
+  url: string;
+  seenBy?: number;
 }
 
-const StoryViewer: React.FC<Props> = ({
-  stories,
-  activeIndex,
-  setActiveIndex,
-}) => {
+interface Props {
+  stories: Story[];
+  activeIndex: number | null;
+  setActiveIndex: Dispatch<SetStateAction<number | null>>;
+}
 
-  const videoRef = useRef<HTMLVideoElement>(null);
+const StoryViewer = ({ stories, activeIndex, setActiveIndex }: Props) => {
   const [progress, setProgress] = useState(0);
+  const story = activeIndex === null ? null : stories[activeIndex];
 
-  const story =
-    activeIndex !== null && stories ? stories[activeIndex] : null;
+  const closeViewer = useCallback(() => setActiveIndex(null), [setActiveIndex]);
 
-  /* AUTO PROGRESS */
+  const showNextStory = useCallback(() => {
+    if (activeIndex === null || activeIndex >= stories.length - 1) {
+      closeViewer();
+      return;
+    }
+
+    setActiveIndex(activeIndex + 1);
+  }, [activeIndex, closeViewer, setActiveIndex, stories.length]);
+
+  const showPreviousStory = useCallback(() => {
+    if (activeIndex === null) return;
+
+    if (activeIndex === 0) {
+      setProgress(0);
+      requestAnimationFrame(() => setProgress(100));
+      return;
+    }
+
+    setActiveIndex(activeIndex - 1);
+  }, [activeIndex, setActiveIndex]);
+
+  // Image progress is CSS-animated, so it does not trigger a React render every 100ms.
+  useEffect(() => {
+    if (!story || story.type === "video") return;
+
+    setProgress(0);
+    const animationFrame = requestAnimationFrame(() => setProgress(100));
+    const timeout = window.setTimeout(showNextStory, IMAGE_DURATION);
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      window.clearTimeout(timeout);
+    };
+  }, [showNextStory, story?.id, story?.type]);
 
   useEffect(() => {
-
     if (!story) return;
 
     setProgress(0);
 
-    if (story.type === "video") return;
-
-    const interval = setInterval(() => {
-      setProgress((prev) => prev + 2);
-    }, 100);
-
-    return () => clearInterval(interval);
-
-  }, [activeIndex, story]);
-
-
-  /* VIDEO PROGRESS */
-
-  useEffect(() => {
-
-    if (!story || story.type !== "video") return;
-
-    const video = videoRef.current;
-    if (!video) return;
-
-    const update = () => {
-      const value = (video.currentTime / video.duration) * 100;
-      setProgress(value);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeViewer();
+      if (event.key === "ArrowRight") showNextStory();
+      if (event.key === "ArrowLeft") showPreviousStory();
     };
 
-    video.addEventListener("timeupdate", update);
-
-    return () => {
-      video.removeEventListener("timeupdate", update);
-    };
-
-  }, [story]);
-
-
-  /* NEXT STORY */
-
-  useEffect(() => {
-
-    if (!story) return;
-
-    if (progress >= 100) {
-
-      if (activeIndex! < stories.length - 1) {
-        setActiveIndex(activeIndex! + 1);
-      } else {
-        setActiveIndex(null);
-      }
-
-    }
-
-  }, [progress, story]);
-
-
-  const nextStory = () => {
-    if (activeIndex !== null && activeIndex < stories.length - 1) {
-      setActiveIndex(activeIndex + 1);
-    }
-  };
-
-  const prevStory = () => {
-    if (activeIndex !== null && activeIndex > 0) {
-      setActiveIndex(activeIndex - 1);
-    }
-  };
-
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [closeViewer, showNextStory, showPreviousStory, story?.id]);
 
   if (!story) return null;
 
+  const currentIndex = activeIndex ?? -1;
+  const isVideo = story.type === "video";
+  const handleVideoProgress = (event: SyntheticEvent<HTMLVideoElement>) => {
+    const { currentTime, duration } = event.currentTarget;
+    setProgress(Number.isFinite(duration) && duration > 0 ? (currentTime / duration) * 100 : 0);
+  };
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center">
-
-      {/* CLOSE */}
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${story.user}'s story`}
+    >
       <button
-        className="absolute top-6 right-8 text-white"
-        onClick={() => setActiveIndex(null)}
+        type="button"
+        className="absolute right-5 top-5 z-20 text-white transition-opacity hover:opacity-75 focus:outline-none focus:ring-2 focus:ring-white sm:right-8 sm:top-6"
+        onClick={closeViewer}
+        aria-label="Close story"
       >
         <X size={32} />
       </button>
 
-
-      {/* STORY CARD */}
-      <div className="relative w-[380px] h-[680px] rounded-xl overflow-hidden bg-black">
-
-
-        {/* PROGRESS BARS */}
-        <div className="absolute top-3 left-3 right-3 flex gap-1 z-10">
-
-          {stories.map((_, i) => (
-            <div key={i} className="flex-1 h-[3px] bg-white/30">
-
+      <div className="relative h-[min(680px,calc(100vh-2rem))] w-[min(380px,100%)] overflow-hidden rounded-xl bg-black">
+        <div className="absolute left-3 right-3 top-3 z-10 flex gap-1" aria-hidden="true">
+          {stories.map((item, index) => (
+            <div key={item.id ?? index} className="h-[3px] flex-1 overflow-hidden bg-white/30">
               <div
-                className="h-full bg-white transition-all"
+                className="h-full bg-white transition-[width] ease-linear"
                 style={{
-                  width:
-                    i < activeIndex!
-                      ? "100%"
-                      : i === activeIndex
-                      ? `${progress}%`
-                      : "0%",
+                  width: index < currentIndex ? "100%" : index === currentIndex ? `${progress}%` : "0%",
+                  transitionDuration: !isVideo && index === currentIndex ? `${IMAGE_DURATION}ms` : "100ms",
                 }}
               />
-
             </div>
           ))}
-
         </div>
 
-
-        {/* USER INFO */}
-        <div className="absolute top-6 left-4 flex items-center gap-3 text-white z-10">
-
-          <img src={story.avatar} className="w-9 h-9 rounded-full" />
-
-          <p className="text-sm font-semibold">
-            {story.user}
-          </p>
-
+        <div className="absolute left-4 top-6 z-10 flex items-center gap-3 text-white">
+          <img src={story.avatar} alt="" className="h-9 w-9 rounded-full object-cover" />
+          <p className="text-sm font-semibold">{story.user}</p>
         </div>
 
-
-        {/* MEDIA */}
-
-        {story.type === "video" ? (
-
+        {isVideo ? (
           <video
-            ref={videoRef}
+            key={story.id ?? activeIndex}
             src={story.url}
             autoPlay
             muted
             playsInline
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
+            onTimeUpdate={handleVideoProgress}
+            onEnded={showNextStory}
+            onError={showNextStory}
           />
-
         ) : (
-
-          <img
-            src={story.url}
-            className="w-full h-full object-cover"
-          />
-
+          <img src={story.url} alt={`${story.user}'s story`} className="h-full w-full object-cover" />
         )}
 
-
-        {/* TAP LEFT */}
-        <div
-          onClick={prevStory}
-          className="absolute left-0 top-0 w-1/2 h-full"
+        <button
+          type="button"
+          className="absolute left-0 top-0 h-full w-1/2 cursor-pointer focus:outline-none"
+          onClick={showPreviousStory}
+          aria-label="Previous story"
+        />
+        <button
+          type="button"
+          className="absolute right-0 top-0 h-full w-1/2 cursor-pointer focus:outline-none"
+          onClick={showNextStory}
+          aria-label="Next story"
         />
 
-        {/* TAP RIGHT */}
-        <div
-          onClick={nextStory}
-          className="absolute right-0 top-0 w-1/2 h-full"
-        />
-
-
-        {/* SEEN */}
-        <div className="absolute bottom-4 left-4 text-white text-sm">
-          👀 Seen by {story.seenBy ?? 0}
-        </div>
-
+        <div className="absolute bottom-4 left-4 text-sm text-white">👀 Seen by {story.seenBy ?? 0}</div>
       </div>
-
     </div>
   );
 };
