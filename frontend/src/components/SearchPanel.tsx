@@ -1,134 +1,129 @@
-import React from "react";
+import { memo, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
-interface Props {
+interface SearchPanelProps {
   open: boolean;
   onClose: () => void;
   sidebarWidth: number;
 }
 
-const SearchPanel: React.FC<Props> = ({ open, onClose, sidebarWidth }) => {
+interface RecentUser {
+  username: string;
+  name: string;
+  avatarUrl: string;
+}
+
+const PANEL_WIDTH = 400;
+
+const RECENT_USERS: readonly RecentUser[] = [
+  {
+    username: "deepa.gautam2510",
+    name: "Deepa Gautam",
+    avatarUrl: "https://i.pravatar.cc/100?u=deepa",
+  },
+  {
+    username: "karan.vlogs_14",
+    name: "Karan Thakur",
+    avatarUrl: "https://i.pravatar.cc/100?u=karan",
+  },
+];
+
+const SearchPanel = memo(function SearchPanel({
+  open,
+  onClose,
+  sidebarWidth,
+}: SearchPanelProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    inputRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
     <>
-      {/* Main Search Panel */}
-      <div
-        className="
-          fixed top-0 h-full shadow-lg animate-slideIn z-40
-          bg-white dark:bg-[#121212]
-          text-gray-800 dark:text-gray-200
-          border-l border-gray-200 dark:border-gray-800
-          transition-colors duration-300 overflow-y-auto
-        "
-        style={{ left: sidebarWidth, width: 400 }}
-        onClick={(e) => e.stopPropagation()}
+      <aside
+        aria-label="Search panel"
+        className="fixed top-0 z-40 h-full overflow-y-auto border-l border-gray-200 bg-white text-gray-800 shadow-lg animate-slideIn transition-colors duration-300 dark:border-gray-800 dark:bg-[#121212] dark:text-gray-200"
+        style={{ left: sidebarWidth, width: PANEL_WIDTH }}
+        onClick={(event) => event.stopPropagation()}
       >
-        {/* Header */}
-        <div
-          className="
-            flex justify-between items-center p-4 border-b
-            border-gray-200 dark:border-gray-800
-            sticky top-0 bg-white dark:bg-[#121212] z-10
-            transition-colors
-          "
-        >
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-4 transition-colors dark:border-gray-800 dark:bg-[#121212]">
           <h2 className="text-xl font-semibold">Search</h2>
           <button
+            type="button"
+            aria-label="Close search"
             onClick={onClose}
-            className="text-gray-600 dark:text-gray-400 hover:text-red-500 transition"
+            className="text-gray-600 transition hover:text-red-500 dark:text-gray-400"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
-        </div>
+        </header>
 
-        {/* Search Input */}
         <div className="p-4">
           <input
-            type="text"
+            ref={inputRef}
+            type="search"
             placeholder="Search"
-            className="
-              w-full px-4 py-2 
-              bg-gray-100 dark:bg-gray-800 
-              text-sm text-gray-900 dark:text-gray-200
-              placeholder-gray-500 dark:placeholder-gray-400
-              rounded-md outline-none
-              transition-colors duration-300
-            "
+            aria-label="Search users"
+            className="w-full rounded-md bg-gray-100 px-4 py-2 text-sm text-gray-900 outline-none transition-colors duration-300 placeholder:text-gray-500 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-400"
           />
         </div>
 
-        {/* Recent Section */}
-        <p className="px-4 text-sm text-gray-500 dark:text-gray-400 mb-2">
-          Recent
-        </p>
+        <p className="mb-2 px-4 text-sm text-gray-500 dark:text-gray-400">Recent</p>
 
-        <div className="px-4 space-y-2 pb-4">
-          {/* Example User Item */}
-          <div
-            className="
-              flex items-center justify-between 
-              hover:bg-gray-50 dark:hover:bg-gray-900 
-              rounded-md p-2 transition-colors
-            "
-          >
-            <div className="flex items-center gap-3">
-              <img
-                src="https://i.pravatar.cc/100?u=deepa"
-                className="w-10 h-10 rounded-full object-cover"
-                alt="Deepa Gautam"
-              />
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  deepa.gautam2510
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Deepa Gautam
-                </p>
+        <ul className="space-y-2 px-4 pb-4">
+          {RECENT_USERS.map((user) => (
+            <li
+              key={user.username}
+              className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <img
+                  src={user.avatarUrl}
+                  className="h-10 w-10 rounded-full object-cover"
+                  alt=""
+                  loading="lazy"
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {user.username}
+                  </p>
+                  <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                    {user.name}
+                  </p>
+                </div>
               </div>
-            </div>
-            <span className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer">
-              ✕
-            </span>
-          </div>
+              <button
+                type="button"
+                aria-label={`Remove ${user.username} from recent searches`}
+                className="ml-3 shrink-0 text-gray-400 transition hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
 
-          {/* Example 2 (optional extra recent user) */}
-          <div
-            className="
-              flex items-center justify-between 
-              hover:bg-gray-50 dark:hover:bg-gray-900 
-              rounded-md p-2 transition-colors
-            "
-          >
-            <div className="flex items-center gap-3">
-              <img
-                src="https://i.pravatar.cc/100?u=karan"
-                className="w-10 h-10 rounded-full object-cover"
-                alt="Karan"
-              />
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  karan.vlogs_14
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Karan Thakur
-                </p>
-              </div>
-            </div>
-            <span className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer">
-              ✕
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Overlay Background */}
-      <div
-        className="fixed inset-0 bg-black/20 dark:bg-black/40 z-30 transition"
+      <button
+        type="button"
+        aria-label="Close search"
+        className="fixed inset-0 z-30 cursor-default bg-black/20 transition dark:bg-black/40"
         onClick={onClose}
-      ></div>
+      />
     </>
   );
-};
+});
 
 export default SearchPanel;
