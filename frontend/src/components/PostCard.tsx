@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import {
   Heart,
   MessageCircle,
@@ -7,7 +7,22 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
-const PostCard = memo(({ post }: { post: any }) => {
+export interface PostCardPost {
+  user: {
+    name: string;
+    avatar: string;
+  };
+  imageUrl: string;
+  caption: string;
+}
+
+interface PostCardProps {
+  post: PostCardPost;
+}
+
+const PostCard = memo(function PostCard({ post }: PostCardProps) {
+  const { user, imageUrl, caption } = post;
+
   return (
     <article
       className="
@@ -29,8 +44,10 @@ const PostCard = memo(({ post }: { post: any }) => {
         <div className="flex items-center gap-3">
           <div className="relative">
             <img
-              src={post.user.avatar}
-              alt={post.user.name}
+              src={user.avatar}
+              alt={`${user.name}'s profile`}
+              loading="lazy"
+              decoding="async"
               className="
                 w-11 h-11 rounded-full
                 object-cover
@@ -51,7 +68,7 @@ const PostCard = memo(({ post }: { post: any }) => {
 
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              {post.user.name}
+              {user.name}
             </h3>
 
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -61,6 +78,8 @@ const PostCard = memo(({ post }: { post: any }) => {
         </div>
 
         <button
+          type="button"
+          aria-label="Post options"
           className="
             p-2 rounded-full
             hover:bg-gray-100
@@ -78,9 +97,10 @@ const PostCard = memo(({ post }: { post: any }) => {
       {/* Image */}
       <div className="relative group overflow-hidden">
         <img
-          src={post.imageUrl}
-          alt={post.caption}
+          src={imageUrl}
+          alt={caption}
           loading="lazy"
+          decoding="async"
           className="
             w-full
             max-h-[550px]
@@ -104,6 +124,8 @@ const PostCard = memo(({ post }: { post: any }) => {
       <div className="px-4 pt-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
+            type="button"
+            aria-label="Like post"
             className="
               hover:scale-110
               transition-transform
@@ -116,6 +138,8 @@ const PostCard = memo(({ post }: { post: any }) => {
           </button>
 
           <button
+            type="button"
+            aria-label="View comments"
             className="
               hover:scale-110
               transition-transform
@@ -128,6 +152,8 @@ const PostCard = memo(({ post }: { post: any }) => {
           </button>
 
           <button
+            type="button"
+            aria-label="Share post"
             className="
               hover:scale-110
               transition-transform
@@ -141,6 +167,8 @@ const PostCard = memo(({ post }: { post: any }) => {
         </div>
 
         <button
+          type="button"
+          aria-label="Save post"
           className="
             hover:scale-110
             transition-transform
@@ -164,15 +192,16 @@ const PostCard = memo(({ post }: { post: any }) => {
       <div className="px-4 py-3">
         <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
           <span className="font-semibold text-gray-900 dark:text-white mr-2">
-            {post.user.name}
+            {user.name}
           </span>
-          {post.caption}
+          {caption}
         </p>
       </div>
 
       {/* Comments */}
       <div className="px-4 pb-4">
         <button
+          type="button"
           className="
             text-sm text-gray-500
             hover:text-gray-700
