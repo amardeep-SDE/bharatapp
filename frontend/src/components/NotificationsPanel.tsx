@@ -1,5 +1,5 @@
-import React from "react";
-import { X } from "lucide-react";
+import { memo, useEffect } from "react";
+import { ChevronRight, X } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -7,36 +7,44 @@ interface Props {
   sidebarWidth: number;
 }
 
-const NotificationsPanel: React.FC<Props> = ({ open, onClose, sidebarWidth }) => {
-  if (!open) return null;
+interface Notification {
+  id: number;
+  name: string;
+  message: string;
+  postThumb: string;
+  time: string;
+  userImg: string;
+}
 
-  const notifications = {
-    requests: [
+const followRequest = {
+  name: "just_feelinn__00",
+  others: 4,
+  img: "https://i.pravatar.cc/100?u=req",
+};
+
+const notificationGroups: Array<{ title: string; notifications: Notification[] }> = [
+  {
+    title: "Yesterday",
+    notifications: [
       {
         id: 1,
-        name: "just_feelinn__00",
-        others: 4,
-        img: "https://i.pravatar.cc/100?u=req",
-      },
-    ],
-    yesterday: [
-      {
-        id: 1,
-        users: ["rajukashyap55222", "karanthakurvlogs148"],
+        name: "rajukashyap55222 and karanthakurvlogs148",
         message:
-          "liked your comment: Aise hawan har ghar mein hone chahiye , 😆😅😂 magar pyar se 😅😂",
+          "liked your comment: Aise hawan har ghar mein hone chahiye, 😆😅😂 magar pyar se 😅😂",
         time: "1d",
         postThumb:
           "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=80&h=80&fit=crop",
         userImg: "https://i.pravatar.cc/100?u=raju",
       },
     ],
-    thisWeek: [
+  },
+  {
+    title: "This week",
+    notifications: [
       {
         id: 2,
         name: "karanthakurvlogs148",
-        message:
-          "mentioned you in a comment: @10_amardeep_16 tujhe bhi koi nhi mil rhi h na 😂",
+        message: "mentioned you in a comment: @10_amardeep_16 tujhe bhi koi nhi mil rhi h na 😂",
         time: "6d",
         postThumb:
           "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=80&h=80&fit=crop",
@@ -45,15 +53,17 @@ const NotificationsPanel: React.FC<Props> = ({ open, onClose, sidebarWidth }) =>
       {
         id: 3,
         name: "karanthakurvlogs148",
-        message:
-          "liked your comment: Are ni sir ..wo sharmayi hi thi..🤣🤣 main samjh sakta hu sir 😂😅",
+        message: "liked your comment: Are ni sir ..wo sharmayi hi thi..🤣🤣 main samjh sakta hu sir 😅",
         time: "6d",
         postThumb:
           "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=80&h=80&fit=crop",
         userImg: "https://i.pravatar.cc/100?u=karan2",
       },
     ],
-    thisMonth: [
+  },
+  {
+    title: "This month",
+    notifications: [
       {
         id: 4,
         name: "__mahimagarg",
@@ -64,189 +74,114 @@ const NotificationsPanel: React.FC<Props> = ({ open, onClose, sidebarWidth }) =>
         userImg: "https://i.pravatar.cc/100?u=mahi",
       },
     ],
-  };
+  },
+];
+
+const NotificationRow = memo(function NotificationRow({ notification }: { notification: Notification }) {
+  const { name, message, postThumb, time, userImg } = notification;
+
+  return (
+    <article className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900">
+      <img
+        src={userImg}
+        alt={`${name}'s profile`}
+        loading="lazy"
+        decoding="async"
+        className="h-10 w-10 shrink-0 rounded-full object-cover"
+      />
+      <div className="min-w-0 flex-1 text-sm">
+        <p className="leading-relaxed text-gray-700 dark:text-gray-300">
+          <strong className="font-semibold text-gray-900 dark:text-white">{name}</strong>{" "}
+          {message}
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">{time}</p>
+      </div>
+      <img
+        src={postThumb}
+        alt="Related post"
+        loading="lazy"
+        decoding="async"
+        className="h-12 w-12 shrink-0 rounded-lg object-cover"
+      />
+    </article>
+  );
+});
+
+const NotificationsPanel = memo(function NotificationsPanel({ open, onClose, sidebarWidth }: Props) {
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
+  if (!open) return null;
 
   return (
     <>
-      {/* Main Panel */}
-      <div
-        className="
-          fixed top-0 h-full shadow-lg animate-slideIn z-40 overflow-y-auto
-          bg-white dark:bg-[#121212]
-          text-gray-800 dark:text-gray-200
-          border-l border-gray-200 dark:border-gray-800
-          transition-colors duration-300
-        "
-        style={{ left: sidebarWidth, width: 400 }}
-        onClick={(e) => e.stopPropagation()}
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="notifications-title"
+        className="fixed top-0 z-40 h-dvh w-[min(400px,calc(100vw-1rem))] overflow-y-auto border-l border-gray-200 bg-white shadow-lg animate-slideIn transition-colors duration-300 dark:border-gray-800 dark:bg-[#121212]"
+        style={{ left: sidebarWidth }}
+        onClick={(event) => event.stopPropagation()}
       >
-        {/* Header */}
-        <div
-          className="
-            flex justify-between items-center p-4 border-b
-            border-gray-200 dark:border-gray-800
-            sticky top-0 bg-white dark:bg-[#121212] z-10
-            transition-colors
-          "
-        >
-          <h2 className="text-2xl font-bold">Notifications</h2>
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-4 transition-colors dark:border-gray-800 dark:bg-[#121212]">
+          <h2 id="notifications-title" className="text-2xl font-bold text-gray-900 dark:text-white">
+            Notifications
+          </h2>
           <button
+            type="button"
+            aria-label="Close notifications"
             onClick={onClose}
-            className="text-gray-600 dark:text-gray-300 hover:text-red-500 transition"
+            className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-red-500 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <X size={22} />
           </button>
-        </div>
+        </header>
 
-        {/* Follow Requests */}
-        <div
-          className="
-            p-4 border-b border-gray-200 dark:border-gray-800
-            hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors
-          "
+        <button
+          type="button"
+          className="flex w-full items-center gap-3 border-b border-gray-200 p-4 text-left transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900"
         >
-          <div className="flex items-center gap-3">
-            <img
-              src={notifications.requests[0].img}
-              alt="req"
-              className="w-10 h-10 rounded-full"
-            />
-            <div className="flex-1">
-              <p className="text-sm font-semibold">Follow requests</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {notifications.requests[0].name} + {notifications.requests[0].others} others
-              </p>
-            </div>
-            <span className="text-blue-500">›</span>
-          </div>
-        </div>
+          <img src={followRequest.img} alt="Follow request avatars" loading="lazy" decoding="async" className="h-10 w-10 rounded-full object-cover" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-gray-900 dark:text-white">Follow requests</span>
+            <span className="block truncate text-xs text-gray-500 dark:text-gray-400">
+              {followRequest.name} + {followRequest.others} others
+            </span>
+          </span>
+          <ChevronRight aria-hidden="true" size={20} className="shrink-0 text-blue-500" />
+        </button>
 
-        {/* Yesterday */}
-        <div
-          className="
-            p-4 border-b border-gray-200 dark:border-gray-800
-            transition-colors
-          "
-        >
-          <h3 className="text-md font-semibold mb-3">Yesterday</h3>
-          {notifications.yesterday.map((n) => (
-            <div
-              key={n.id}
-              className="
-                flex justify-between items-center mb-3
-                hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md p-2
-                transition-colors
-              "
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={n.userImg}
-                  alt={n.users[0]}
-                  className="w-10 h-10 rounded-full"
-                />
-                <div className="text-sm">
-                  <p>
-                    <strong>{n.users.join(" and ")}</strong> {n.message}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {n.time}
-                  </p>
-                </div>
-              </div>
-              <img
-                src={n.postThumb}
-                alt="post"
-                className="w-12 h-12 rounded-md object-cover"
-              />
+        {notificationGroups.map(({ title, notifications }, index) => (
+          <section
+            key={title}
+            className={`p-4 ${index < notificationGroups.length - 1 ? "border-b border-gray-200 dark:border-gray-800" : ""}`}
+          >
+            <h3 className="mb-3 font-semibold text-gray-900 dark:text-white">{title}</h3>
+            <div className="space-y-1">
+              {notifications.map((notification) => (
+                <NotificationRow key={notification.id} notification={notification} />
+              ))}
             </div>
-          ))}
-        </div>
+          </section>
+        ))}
+      </aside>
 
-        {/* This Week */}
-        <div
-          className="
-            p-4 border-b border-gray-200 dark:border-gray-800
-            transition-colors
-          "
-        >
-          <h3 className="text-md font-semibold mb-3">This week</h3>
-          {notifications.thisWeek.map((n) => (
-            <div
-              key={n.id}
-              className="
-                flex justify-between items-center mb-3
-                hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md p-2
-                transition-colors
-              "
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={n.userImg}
-                  alt={n.name}
-                  className="w-10 h-10 rounded-full"
-                />
-                <div className="text-sm">
-                  <p>
-                    <strong>{n.name}</strong> {n.message}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {n.time}
-                  </p>
-                </div>
-              </div>
-              <img
-                src={n.postThumb}
-                alt="post"
-                className="w-12 h-12 rounded-md object-cover"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* This Month */}
-        <div className="p-4 transition-colors">
-          <h3 className="text-md font-semibold mb-3">This month</h3>
-          {notifications.thisMonth.map((n) => (
-            <div
-              key={n.id}
-              className="
-                flex justify-between items-center mb-3
-                hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md p-2
-                transition-colors
-              "
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={n.userImg}
-                  alt={n.name}
-                  className="w-10 h-10 rounded-full"
-                />
-                <div className="text-sm">
-                  <p>
-                    <strong>{n.name}</strong> {n.message}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {n.time}
-                  </p>
-                </div>
-              </div>
-              <img
-                src={n.postThumb}
-                alt="post"
-                className="w-12 h-12 rounded-md object-cover"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Click outside to close */}
-      <div
-        className="fixed inset-0 bg-black/20 dark:bg-black/40 z-30"
+      <button
+        type="button"
+        aria-label="Close notifications"
+        className="fixed inset-0 z-30 cursor-default bg-black/20 dark:bg-black/40"
         onClick={onClose}
-      ></div>
+      />
     </>
   );
-};
+});
 
 export default NotificationsPanel;
