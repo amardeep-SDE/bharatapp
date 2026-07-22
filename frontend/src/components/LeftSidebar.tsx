@@ -1,20 +1,21 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
-  Home,
-  Search,
   Compass,
   Film,
-  MessageCircle,
   Heart,
-  PlusSquare,
-  User,
+  Home,
   Menu,
+  MessageCircle,
+  PlusSquare,
+  Search,
+  User,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import SearchPanel from "./SearchPanel";
-import NotificationsPanel from "./NotificationsPanel";
-import MoreMenu from "./MoreMenu";
 import CreateModal from "./CreateModal";
+import MoreMenu from "./MoreMenu";
+import NotificationsPanel from "./NotificationsPanel";
+import SearchPanel from "./SearchPanel";
 
 interface LeftSidebarProps {
   activePanel: string | null;
@@ -22,154 +23,192 @@ interface LeftSidebarProps {
   onClosePanel: () => void;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({
+interface RouteItem {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+const HOME_ROUTE: RouteItem = { to: "/", label: "Home", icon: Home };
+
+const DISCOVERY_ROUTES: RouteItem[] = [
+  { to: "/explore", label: "Explore", icon: Compass },
+  { to: "/reels", label: "Reels", icon: Film },
+];
+
+const PROFILE_ROUTE: RouteItem = {
+  to: "/profile",
+  label: "Profile",
+  icon: User,
+};
+
+const menuItemClass =
+  "flex w-full items-center gap-3 rounded-lg p-2 text-gray-800 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800";
+const activeMenuItemClass = "bg-gray-100 dark:bg-gray-800";
+
+const LeftSidebar = ({
   activePanel,
   onOpenPanel,
   onClosePanel,
-}) => {
+}: LeftSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const [openMore, setOpenMore] = useState(false);
-const [openCreate, setOpenCreate] = useState(false);
+  const isCollapsed = activePanel !== null || location.pathname === "/messages";
+  const sidebarWidth = isCollapsed ? 80 : 256;
+  const itemAlignment = isCollapsed ? "justify-center" : "justify-start";
 
   const togglePanel = (panel: string) => {
-    if (activePanel === panel) onClosePanel();
-    else onOpenPanel(panel);
-  };
+    if (activePanel === panel) {
+      onClosePanel();
+      return;
+    }
 
-  // collapse sidebar if any panel or messages route active
-  const isCollapsed = activePanel !== null || location.pathname === "/messages";
+    onOpenPanel(panel);
+  };
 
   const toggleMessages = () => {
-    if (location.pathname === "/messages") navigate("/");
-    else navigate("/messages");
+    navigate(location.pathname === "/messages" ? "/" : "/messages");
   };
+
+  const renderLabel = (label: string) => !isCollapsed && <span>{label}</span>;
 
   return (
     <>
       <aside
-        className={`
-          flex flex-col justify-between
-          border-r border-gray-200 dark:border-gray-800
-          bg-white dark:bg-[#121212]
-          h-screen fixed left-0 top-0 p-4 z-50
-          transition-all duration-300 ease-in-out
-          ${isCollapsed ? "w-20 items-center" : "w-64"}
-        `}
+        className={`fixed left-0 top-0 z-50 flex h-screen flex-col justify-between border-r border-gray-200 bg-white p-4 transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-[#121212] ${
+          isCollapsed ? "w-20 items-center" : "w-64"
+        }`}
       >
-        {/* Logo */}
-        {!isCollapsed ? (
-          <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-500 mb-8 pl-2">
-            BharatGram
-          </h1>
-        ) : (
-          <div className="mb-8 w-10 h-10 rounded-md bg-blue-600 dark:bg-blue-500" />
-        )}
+        <div className="w-full">
+          {isCollapsed ? (
+            <div className="mb-8 h-10 w-10 rounded-md bg-blue-600 dark:bg-blue-500" />
+          ) : (
+            <h1 className="mb-8 pl-2 text-2xl font-bold text-blue-600 dark:text-blue-500">
+              BharatGram
+            </h1>
+          )}
 
-        {/* Menu */}
-        <nav className="space-y-4 w-full">
-          <NavLink
-            to="/"
-            onClick={onClosePanel}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 justify-center sm:justify-start text-gray-800 dark:text-gray-200 transition"
-          >
-            <Home size={22} /> {!isCollapsed && "Home"}
-          </NavLink>
+          <nav className="w-full space-y-4" aria-label="Primary navigation">
+            <NavLink
+              to={HOME_ROUTE.to}
+              end
+              onClick={onClosePanel}
+              className={({ isActive }) =>
+                `${menuItemClass} ${itemAlignment} ${
+                  isActive ? activeMenuItemClass : ""
+                }`
+              }
+            >
+              <HOME_ROUTE.icon size={22} />
+              {renderLabel(HOME_ROUTE.label)}
+            </NavLink>
 
-          <button
-            onClick={() => togglePanel("search")}
-            className={`flex items-center gap-3 p-2 w-full rounded-lg justify-center sm:justify-start hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 transition ${
-              activePanel === "search" ? "bg-gray-100 dark:bg-gray-800" : ""
-            }`}
-          >
-            <Search size={22} /> {!isCollapsed && "Search"}
-          </button>
+            <button
+              type="button"
+              onClick={() => togglePanel("search")}
+              aria-pressed={activePanel === "search"}
+              className={`${menuItemClass} ${itemAlignment} ${
+                activePanel === "search" ? activeMenuItemClass : ""
+              }`}
+            >
+              <Search size={22} />
+              {renderLabel("Search")}
+            </button>
 
-          <NavLink
-            to="/explore"
-            onClick={onClosePanel}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 justify-center sm:justify-start text-gray-800 dark:text-gray-200 transition"
-          >
-            <Compass size={22} /> {!isCollapsed && "Explore"}
-          </NavLink>
+            {DISCOVERY_ROUTES.map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={onClosePanel}
+                className={({ isActive }) =>
+                  `${menuItemClass} ${itemAlignment} ${
+                    isActive ? activeMenuItemClass : ""
+                  }`
+                }
+              >
+                <Icon size={22} />
+                {renderLabel(label)}
+              </NavLink>
+            ))}
 
-          <NavLink
-            to="/reels"
-            onClick={onClosePanel}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 justify-center sm:justify-start text-gray-800 dark:text-gray-200 transition"
-          >
-            <Film size={22} /> {!isCollapsed && "Reels"}
-          </NavLink>
+            <button
+              type="button"
+              onClick={toggleMessages}
+              aria-pressed={location.pathname === "/messages"}
+              className={`${menuItemClass} ${itemAlignment} ${
+                location.pathname === "/messages" ? activeMenuItemClass : ""
+              }`}
+            >
+              <MessageCircle size={22} />
+              {renderLabel("Messages")}
+            </button>
 
-          {/* 💬 MESSAGES (Route-based toggle) */}
-          <button
-            onClick={toggleMessages}
-            className={`flex items-center gap-3 p-2 w-full rounded-lg justify-center sm:justify-start hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 transition ${
-              location.pathname === "/messages" ? "bg-gray-100 dark:bg-gray-800" : ""
-            }`}
-          >
-            <MessageCircle size={22} /> {!isCollapsed && "Messages"}
-          </button>
+            <button
+              type="button"
+              onClick={() => togglePanel("notifications")}
+              aria-pressed={activePanel === "notifications"}
+              className={`${menuItemClass} ${itemAlignment} ${
+                activePanel === "notifications" ? activeMenuItemClass : ""
+              }`}
+            >
+              <Heart size={22} />
+              {renderLabel("Notifications")}
+            </button>
 
-          <button
-            onClick={() => togglePanel("notifications")}
-            className={`flex items-center gap-3 p-2 w-full rounded-lg justify-center sm:justify-start hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 transition ${
-              activePanel === "notifications" ? "bg-gray-100 dark:bg-gray-800" : ""
-            }`}
-          >
-            <Heart size={22} /> {!isCollapsed && "Notifications"}
-          </button>
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              className={`${menuItemClass} ${itemAlignment}`}
+            >
+              <PlusSquare size={22} />
+              {renderLabel("Create")}
+            </button>
 
-        <button
-  onClick={() => setOpenCreate(true)}
-  className={`flex items-center gap-3 p-2 w-full rounded-lg
-    justify-center sm:justify-start hover:bg-gray-100 dark:hover:bg-gray-800
-    text-gray-800 dark:text-gray-200 transition`}
->
-  <PlusSquare size={22} /> {!isCollapsed && "Create"}
-</button>
+            <NavLink
+              to={PROFILE_ROUTE.to}
+              onClick={onClosePanel}
+              className={({ isActive }) =>
+                `${menuItemClass} ${itemAlignment} ${
+                  isActive ? activeMenuItemClass : ""
+                }`
+              }
+            >
+              <PROFILE_ROUTE.icon size={22} />
+              {renderLabel(PROFILE_ROUTE.label)}
+            </NavLink>
+          </nav>
+        </div>
 
-
-          <NavLink
-            to="/profile"
-            onClick={onClosePanel}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 justify-center sm:justify-start text-gray-800 dark:text-gray-200 transition"
-          >
-            <User size={22} /> {!isCollapsed && "Profile"}
-          </NavLink>
-        </nav>
-
-        {/* Footer */}
         <div className="relative w-full">
           <button
-            onClick={() => setOpenMore((prev) => !prev)}
-            className={`flex items-center gap-3 p-2 w-full rounded-lg justify-center sm:justify-start hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 transition ${
-              openMore ? "bg-gray-100 dark:bg-gray-800" : ""
+            type="button"
+            onClick={() => setIsMoreOpen((isOpen) => !isOpen)}
+            aria-expanded={isMoreOpen}
+            className={`${menuItemClass} ${itemAlignment} ${
+              isMoreOpen ? activeMenuItemClass : ""
             }`}
           >
-            <Menu size={22} /> {!isCollapsed && "More"}
+            <Menu size={22} />
+            {renderLabel("More")}
           </button>
-          <MoreMenu open={openMore} onClose={() => setOpenMore(false)} />
+          <MoreMenu open={isMoreOpen} onClose={() => setIsMoreOpen(false)} />
         </div>
       </aside>
 
-      {/* Panels */}
       <SearchPanel
         open={activePanel === "search"}
         onClose={onClosePanel}
-        sidebarWidth={isCollapsed ? 80 : 256}
+        sidebarWidth={sidebarWidth}
       />
       <NotificationsPanel
         open={activePanel === "notifications"}
         onClose={onClosePanel}
-        sidebarWidth={isCollapsed ? 80 : 256}
+        sidebarWidth={sidebarWidth}
       />
-      <CreateModal
-  open={openCreate}
-  onClose={() => setOpenCreate(false)}
-/>
-
+      <CreateModal open={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
     </>
   );
 };
