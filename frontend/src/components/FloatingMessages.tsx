@@ -1,22 +1,25 @@
-import React, { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { X } from "lucide-react";
 
-const FloatingMessages: React.FC = () => {
-  const [open, setOpen] = useState(false);
+const USERS = [
+  { id: 1, img: "https://i.pravatar.cc/40?u=1" },
+  { id: 2, img: "https://i.pravatar.cc/40?u=2" },
+  { id: 3, img: "https://i.pravatar.cc/40?u=3" },
+] as const;
 
-  // demo users (avatars)
-  const users = [
-    { id: 1, img: "https://i.pravatar.cc/40?u=1" },
-    { id: 2, img: "https://i.pravatar.cc/40?u=2" },
-    { id: 3, img: "https://i.pravatar.cc/40?u=3" },
-  ];
+const FloatingMessages = memo(function FloatingMessages() {
+  const [open, setOpen] = useState(false);
+  const openMessages = useCallback(() => setOpen(true), []);
+  const closeMessages = useCallback(() => setOpen(false), []);
 
   return (
     <>
       {/* 🔘 Floating Avatar Button */}
       {!open && (
         <button
-          onClick={() => setOpen(true)}
+          type="button"
+          onClick={openMessages}
+          aria-label="Open messages"
           className="
             fixed bottom-6 right-6 z-[60]
             flex items-center gap-2
@@ -27,11 +30,14 @@ const FloatingMessages: React.FC = () => {
         >
           {/* avatars stack */}
           <div className="flex -space-x-2">
-            {users.map((u) => (
+            {USERS.map((user) => (
               <img
-                key={u.id}
-                src={u.img}
-                alt="user"
+                key={user.id}
+                src={user.img}
+                alt=""
+                width={28}
+                height={28}
+                decoding="async"
                 className="w-7 h-7 rounded-full border-2 border-black"
               />
             ))}
@@ -60,7 +66,11 @@ const FloatingMessages: React.FC = () => {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
             <p className="font-semibold text-sm">Messages</p>
-            <button onClick={() => setOpen(false)}>
+            <button
+              type="button"
+              onClick={closeMessages}
+              aria-label="Close messages"
+            >
               <X size={18} />
             </button>
           </div>
@@ -73,6 +83,6 @@ const FloatingMessages: React.FC = () => {
       )}
     </>
   );
-};
+});
 
 export default FloatingMessages;
