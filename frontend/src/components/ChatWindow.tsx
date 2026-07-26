@@ -1,38 +1,43 @@
-import React from "react";
+import { memo } from "react";
 import { Phone, Video, Info, Send } from "lucide-react";
+import type { Chat } from "./ChatList";
 
 interface ChatWindowProps {
-  chat: any;
+  chat: Chat | null;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ chat }) => {
+const EmptyChatWindow = () => (
+  <div
+    className="
+      flex flex-1 flex-col items-center justify-center text-center
+      bg-white dark:bg-[#121212]
+      text-gray-800 dark:text-gray-200
+      transition-colors duration-300
+    "
+  >
+    <div
+      className="
+        w-16 h-16 border rounded-full flex items-center justify-center mb-4
+        border-gray-300 dark:border-gray-700
+      "
+    >
+      <Send size={28} className="text-gray-600 dark:text-gray-300" />
+    </div>
+    <h2 className="text-lg font-semibold">Your messages</h2>
+    <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
+      Send a message to start a chat.
+    </p>
+    <button className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition">
+      Send message
+    </button>
+  </div>
+);
+
+const ChatWindow = memo(({ chat }: ChatWindowProps) => {
   if (!chat)
-    return (
-      <div
-        className="
-          flex flex-1 flex-col items-center justify-center text-center
-          bg-white dark:bg-[#121212]
-          text-gray-800 dark:text-gray-200
-          transition-colors duration-300
-        "
-      >
-        <div
-          className="
-            w-16 h-16 border rounded-full flex items-center justify-center mb-4
-            border-gray-300 dark:border-gray-700
-          "
-        >
-          <Send size={28} className="text-gray-600 dark:text-gray-300" />
-        </div>
-        <h2 className="text-lg font-semibold">Your messages</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
-          Send a message to start a chat.
-        </p>
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition">
-          Send message
-        </button>
-      </div>
-    );
+    return <EmptyChatWindow />;
+
+  const username = chat.name.toLowerCase();
 
   return (
     <div
@@ -92,7 +97,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chat }) => {
           {chat.name}
         </h3>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          @{chat.name.toLowerCase()}
+          @{username}
         </p>
         <button
           className="
@@ -136,6 +141,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chat }) => {
       </div>
     </div>
   );
-};
+});
 
 export default ChatWindow;
