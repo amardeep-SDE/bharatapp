@@ -16,12 +16,16 @@ export interface Chat {
   unread: boolean;
 }
 
+type SearchableChat = Chat & {
+  searchText: string;
+};
+
 interface ChatListProps {
   onSelect: (chat: Chat) => void;
   selectedChatId: number | null;
 }
 
-const CHATS: Chat[] = [
+const CHATS: readonly SearchableChat[] = [
   {
     id: 1,
     name: "Janak",
@@ -46,7 +50,11 @@ const CHATS: Chat[] = [
     avatar: "https://i.pravatar.cc/150?u=anurag",
     unread: false,
   },
-];
+].map((chat) => ({
+  ...chat,
+  // Build this once instead of lowercasing every chat field for each keystroke.
+  searchText: `${chat.name} ${chat.message}`.toLowerCase(),
+}));
 
 interface ChatListItemProps {
   chat: Chat;
@@ -77,6 +85,9 @@ const ChatListItem = memo(({ chat, isSelected, onSelect }: ChatListItemProps) =>
         src={chat.avatar}
         alt={chat.name}
         loading="lazy"
+        decoding="async"
+        width={48}
+        height={48}
         className="h-12 w-12 rounded-full object-cover"
       />
       <div className="min-w-0 flex-1">
@@ -111,11 +122,7 @@ const ChatList = memo(({ onSelect, selectedChatId }: ChatListProps) => {
       return CHATS;
     }
 
-    return CHATS.filter(
-      (chat) =>
-        chat.name.toLowerCase().includes(query) ||
-        chat.message.toLowerCase().includes(query),
-    );
+    return CHATS.filter((chat) => chat.searchText.includes(query));
   }, [deferredSearchTerm]);
 
   return (
