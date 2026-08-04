@@ -1,96 +1,117 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
-const LoginPage: React.FC = () => {
+type LoginForm = {
+  email: string;
+  password: string;
+};
+
+const initialForm: LoginForm = { email: "", password: "" };
+
+const LoginPage = () => {
   const navigate = useNavigate();
+  const [form, setForm] = useState<LoginForm>(initialForm);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const handleChange = ({ target }: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = target;
+    setForm((currentForm) => ({ ...currentForm, [name]: value }));
+  };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(email, password);
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
-    // after login
-    navigate("/");
+    try {
+      const { data } = await axios.post("http://localhost:5000/api/auth/login", {
+        email: form.email.trim(),
+        password: form.password,
+      });
+
+      localStorage.setItem("token", data.token);
+      navigate("/", { replace: true });
+    } catch (requestError: unknown) {
+      const message = axios.isAxiosError<{ message?: string }>(requestError)
+        ? requestError.response?.data?.message
+        : undefined;
+      setError(message || "Unable to log in. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white">
-
-      <div className="w-full max-w-md">
-
-        {/* Login Card */}
-        <div className="bg-[#121212] border border-gray-800 rounded-xl p-8 shadow-lg">
-
-          <h1 className="text-3xl font-bold text-center mb-6 text-blue-500">
+    <main className="flex min-h-screen items-center justify-center bg-black px-4 text-white">
+      <div className="w-full max-w-md space-y-4">
+        <section className="rounded-xl border border-gray-800 bg-[#121212] p-8 shadow-lg">
+          <h1 className="mb-2 text-center text-3xl font-bold text-blue-500">
             BharatGram
           </h1>
+          <p className="mb-6 text-center text-sm text-gray-400">
+            Log in to continue to your account.
+          </p>
+
+          {error && (
+            <p className="mb-4 rounded-md border border-red-900/60 bg-red-950/30 px-3 py-2 text-sm text-red-400" role="alert">
+              {error}
+            </p>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
+            <label className="block">
+              <span className="sr-only">Email address</span>
+              <input
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={handleChange}
+                required
+                disabled={isSubmitting}
+                className="w-full rounded-md border border-gray-700 bg-[#1a1a1a] px-4 py-2 text-white placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+            </label>
 
-            {/* Email */}
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="
-                w-full px-4 py-2 rounded-md
-                bg-[#1a1a1a]
-                border border-gray-700
-                focus:outline-none focus:border-blue-500
-                placeholder-gray-400
-              "
-            />
+            <label className="block">
+              <span className="sr-only">Password</span>
+              <input
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Password"
+                value={form.password}
+                onChange={handleChange}
+                required
+                minLength={6}
+                disabled={isSubmitting}
+                className="w-full rounded-md border border-gray-700 bg-[#1a1a1a] px-4 py-2 text-white placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+            </label>
 
-            {/* Password */}
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="
-                w-full px-4 py-2 rounded-md
-                bg-[#1a1a1a]
-                border border-gray-700
-                focus:outline-none focus:border-blue-500
-                placeholder-gray-400
-              "
-            />
-
-            {/* Login Button */}
             <button
               type="submit"
-              className="
-                w-full py-2 rounded-md
-                bg-blue-600 hover:bg-blue-700
-                font-semibold transition
-              "
+              disabled={isSubmitting}
+              className="w-full rounded-md bg-blue-600 py-2 font-semibold transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#121212] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Log in
+              {isSubmitting ? "Logging in..." : "Log in"}
             </button>
-
           </form>
+        </section>
 
-        </div>
-
-        {/* Signup Card */}
-        <div className="bg-[#121212] border border-gray-800 rounded-xl p-4 mt-4 text-center">
+        <div className="rounded-xl border border-gray-800 bg-[#121212] p-4 text-center">
           <p className="text-gray-400">
-            Don't have an account?{" "}
-            <span
-              onClick={() => navigate("/signup")}
-              className="text-blue-500 cursor-pointer font-semibold"
-            >
+            Don&apos;t have an account?{" "}
+            <Link to="/register" className="font-semibold text-blue-500 hover:text-blue-400">
               Sign up
-            </span>
+            </Link>
           </p>
         </div>
-
       </div>
-
-    </div>
+    </main>
   );
 };
 
