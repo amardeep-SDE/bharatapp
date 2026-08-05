@@ -1,94 +1,207 @@
-import React, { useState } from "react";
-import { Grid, Film, Bookmark, User, Settings, PlusCircle } from "lucide-react";
+import { memo, useCallback, useState } from "react";
+import {
+  Bookmark,
+  Film,
+  Grid,
+  PlusCircle,
+  Settings,
+  User,
+  type LucideIcon,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const Profile: React.FC = () => {
+type TabId = "posts" | "reels" | "saved" | "tagged";
+
+const TABS: readonly { id: TabId; icon: LucideIcon; label: string }[] = [
+  { id: "posts", icon: Grid, label: "Posts" },
+  { id: "reels", icon: Film, label: "Reels" },
+  { id: "saved", icon: Bookmark, label: "Saved" },
+  { id: "tagged", icon: User, label: "Tagged" },
+];
+
+const HIGHLIGHTS = [
+  "Wedding",
+  "#MTMY",
+  "❤️",
+  "#राधा",
+  "चाचा/मामा",
+  "माँ",
+  "Trips",
+  "Friends",
+  "Office",
+  "Memories",
+] as const;
+
+const POSTS = Array.from({ length: 12 }, (_, id) => ({
+  id,
+  img: `https://picsum.photos/seed/profile_${id}/600/600`,
+}));
+
+const SETTINGS_ITEMS = [
+  "Apps and websites",
+  "QR code",
+  "Notifications",
+  "Settings and privacy",
+  "Meta Verified",
+  "Supervision",
+  "Login activity",
+  "Log Out",
+] as const;
+
+const Highlights = memo(() => (
+  <div className="mt-10 overflow-x-auto">
+    <div className="flex min-w-max gap-6">
+      <button type="button" className="flex flex-col items-center text-xs">
+        <span className="flex h-20 w-20 items-center justify-center rounded-full border border-gray-400">
+          <PlusCircle size={26} />
+        </span>
+        <span className="mt-1">New</span>
+      </button>
+
+      {HIGHLIGHTS.map((title, index) => (
+        <button
+          key={title}
+          type="button"
+          className="flex flex-col items-center text-xs"
+        >
+          <span className="h-20 w-20 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px]">
+            <img
+              src={`https://i.pravatar.cc/100?u=highlight_${index}`}
+              alt={`${title} highlight`}
+              loading="lazy"
+              decoding="async"
+              width={80}
+              height={80}
+              className="h-full w-full rounded-full border-2 border-white object-cover dark:border-black"
+            />
+          </span>
+          <span className="mt-1 w-20 truncate text-center">{title}</span>
+        </button>
+      ))}
+    </div>
+  </div>
+));
+
+interface TabsProps {
+  activeTab: TabId;
+  onChange: (tab: TabId) => void;
+}
+
+const Tabs = memo(({ activeTab, onChange }: TabsProps) => (
+  <div className="mt-10 flex justify-center border-t border-gray-200 dark:border-gray-800">
+    {TABS.map(({ id, icon: Icon, label }) => (
+      <button
+        key={id}
+        type="button"
+        onClick={() => onChange(id)}
+        className={`flex items-center gap-2 border-t-2 px-6 py-3 text-sm font-semibold ${
+          activeTab === id
+            ? "border-black dark:border-white"
+            : "border-transparent text-gray-500"
+        }`}
+      >
+        <Icon size={18} />
+        {label}
+      </button>
+    ))}
+  </div>
+));
+
+const PostGrid = memo(() => (
+  <div className="mt-4 grid grid-cols-3 gap-1">
+    {POSTS.map(({ id, img }) => (
+      <img
+        key={id}
+        src={img}
+        alt={`Post ${id + 1}`}
+        loading="lazy"
+        decoding="async"
+        width={600}
+        height={600}
+        className="aspect-square w-full cursor-pointer object-cover hover:opacity-80"
+      />
+    ))}
+  </div>
+));
+
+const SettingsModal = memo(({ onClose }: { onClose: () => void }) => (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+    onClick={onClose}
+    role="presentation"
+  >
+    <div
+      className="w-[420px] overflow-hidden rounded-xl bg-gray-900 text-white"
+      onClick={(event) => event.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Profile settings"
+    >
+      {SETTINGS_ITEMS.map((item) => (
+        <button
+          key={item}
+          type="button"
+          className="w-full border-b border-gray-700 py-4 transition hover:bg-gray-800"
+        >
+          {item}
+        </button>
+      ))}
+      <button type="button" onClick={onClose} className="w-full py-4 hover:bg-gray-800">
+        Cancel
+      </button>
+    </div>
+  </div>
+));
+
+const Profile = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState<TabId>("posts");
   const [openSettings, setOpenSettings] = useState(false);
 
-  const tabs = [
-    { id: "posts", icon: <Grid size={18} />, label: "Posts" },
-    { id: "reels", icon: <Film size={18} />, label: "Reels" },
-    { id: "saved", icon: <Bookmark size={18} />, label: "Saved" },
-    { id: "tagged", icon: <User size={18} />, label: "Tagged" },
-  ];
-
-  const highlights = [
-    "Wedding",
-    "#MTMY",
-    "❤️",
-    "#राधा",
-    "चाचा/मामा",
-    "माँ",
-    "Trips",
-    "Friends",
-    "Office",
-    "Memories",
-  ];
-
-  const posts = Array.from({ length: 12 }).map((_, i) => ({
-    id: i,
-    img: `https://picsum.photos/seed/profile_${i}/600/600`,
-  }));
+  const showSettings = useCallback(() => setOpenSettings(true), []);
+  const hideSettings = useCallback(() => setOpenSettings(false), []);
+  const goToSettings = useCallback(() => navigate("/settings"), [navigate]);
 
   return (
-    <section className="max-w-5xl mx-auto px-4 pt-6 pb-10 text-gray-900 dark:text-gray-100">
-      {/* PROFILE HEADER */}
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
-        {/* Avatar */}
+    <section className="mx-auto max-w-5xl px-4 pb-10 pt-6 text-gray-900 dark:text-gray-100">
+      <div className="flex flex-col items-center gap-10 md:flex-row md:items-start">
         <div className="relative">
           <img
             src="https://i.pravatar.cc/200?u=amardeep"
-            alt="profile"
-            className="w-36 h-36 rounded-full object-cover border border-gray-300 dark:border-gray-700"
+            alt="Amardeep's profile"
+            width={144}
+            height={144}
+            className="h-36 w-36 rounded-full border border-gray-300 object-cover dark:border-gray-700"
           />
-
-          {/* Note Bubble */}
-          <div className="absolute -top-3 left-24 bg-gray-800 text-white text-xs px-3 py-1 rounded-full">
+          <span className="absolute -top-3 left-24 rounded-full bg-gray-800 px-3 py-1 text-xs text-white">
             Note...
-          </div>
+          </span>
         </div>
 
-        {/* USER INFO */}
         <div className="flex-1">
-          {/* Username */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="mb-4 flex items-center gap-3">
             <h2 className="text-2xl font-semibold">10_amardeep_16</h2>
-
-            {/* SETTINGS ICON */}
-            <Settings
-              size={20}
-              className="cursor-pointer"
-              onClick={() => setOpenSettings(true)}
-            />
-
+            <button type="button" onClick={showSettings} aria-label="Open settings">
+              <Settings size={20} />
+            </button>
             <button
-              onClick={() => navigate("/settings")}
-              className="bg-gray-100 dark:bg-gray-800 px-4 py-1 rounded-md text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+              type="button"
+              onClick={goToSettings}
+              className="rounded-md bg-gray-100 px-4 py-1 text-sm font-semibold hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
               Edit Profile
             </button>
-
-            <button className="bg-gray-100 dark:bg-gray-800 px-4 py-1 rounded-md text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700">
+            <button type="button" className="rounded-md bg-gray-100 px-4 py-1 text-sm font-semibold hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
               View Archive
             </button>
           </div>
 
-          {/* Stats */}
-          <ul className="flex gap-6 mb-3 text-sm">
-            <li>
-              <span className="font-semibold">265</span> posts
-            </li>
-            <li>
-              <span className="font-semibold">234</span> followers
-            </li>
-            <li>
-              <span className="font-semibold">180</span> following
-            </li>
+          <ul className="mb-3 flex gap-6 text-sm">
+            <li><span className="font-semibold">265</span> posts</li>
+            <li><span className="font-semibold">234</span> followers</li>
+            <li><span className="font-semibold">180</span> following</li>
           </ul>
 
-          {/* Bio */}
           <div className="text-sm">
             <p className="font-semibold">अमरदीप द्विवेदी</p>
             <p>@engineer 💡</p>
@@ -97,106 +210,10 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* STORIES / HIGHLIGHTS */}
-
-      <div className="mt-10 overflow-x-auto">
-        <div className="flex gap-6 min-w-max">
-          {/* ADD STORY */}
-          <div className="flex flex-col items-center text-xs cursor-pointer">
-            <div className="w-20 h-20 rounded-full border border-gray-400 flex items-center justify-center">
-              <PlusCircle size={26} />
-            </div>
-            <p className="mt-1">New</p>
-          </div>
-
-          {highlights.map((title, i) => (
-            <div
-              key={i}
-              className="flex flex-col items-center text-xs cursor-pointer"
-            >
-              <div className="w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
-                <img
-                  src={`https://i.pravatar.cc/100?u=highlight_${i}`}
-                  className="w-full h-full rounded-full object-cover border-2 border-white dark:border-black"
-                />
-              </div>
-
-              <p className="mt-1 w-20 text-center truncate">{title}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* TABS */}
-
-      <div className="flex justify-center border-t mt-10 border-gray-200 dark:border-gray-800">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold border-t-2 ${
-              activeTab === tab.id
-                ? "border-black dark:border-white"
-                : "border-transparent text-gray-500"
-            }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* POSTS GRID */}
-
-      <div className="grid grid-cols-3 gap-1 mt-4">
-        {posts.map((post) => (
-          <img
-            key={post.id}
-            src={post.img}
-            alt="post"
-            className="w-full aspect-square object-cover hover:opacity-80 cursor-pointer"
-          />
-        ))}
-      </div>
-
-      {/* SETTINGS MODAL */}
-
-      {openSettings && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-          onClick={() => setOpenSettings(false)}
-        >
-          <div
-            className="bg-gray-900 text-white w-[420px] rounded-xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {[
-              "Apps and websites",
-              "QR code",
-              "Notifications",
-              "Settings and privacy",
-              "Meta Verified",
-              "Supervision",
-              "Login activity",
-              "Log Out",
-            ].map((item, i) => (
-              <button
-                key={i}
-                className="w-full py-4 border-b border-gray-700 hover:bg-gray-800 transition"
-              >
-                {item}
-              </button>
-            ))}
-
-            <button
-              onClick={() => setOpenSettings(false)}
-              className="w-full py-4 hover:bg-gray-800"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+      <Highlights />
+      <Tabs activeTab={activeTab} onChange={setActiveTab} />
+      <PostGrid />
+      {openSettings && <SettingsModal onClose={hideSettings} />}
     </section>
   );
 };
