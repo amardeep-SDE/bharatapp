@@ -1,5 +1,12 @@
-import React, { useEffect, useRef } from "react";
-import { Heart, MessageCircle, Bookmark, MoreVertical, Volume2 } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Bookmark,
+  Heart,
+  MessageCircle,
+  MoreVertical,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 
 const reelsData = [
   {
@@ -46,89 +53,126 @@ const reelsData = [
     likes: 2789,
     comments: 56,
   },
-];
+] as const;
 
 const Reels: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [muted, setMuted] = useState(true);
 
+  // Observe the panels, rather than every video. This keeps autoplay tied to the
+  // scroll container and avoids playback churn when a video's bounds change.
   useEffect(() => {
-    const videos = containerRef.current?.querySelectorAll("video");
+    const container = containerRef.current;
+    if (!container) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          const video = entry.target as HTMLVideoElement;
-          if (entry.isIntersecting) {
-            video.play();
-          } else {
-            video.pause();
-          }
-        });
+        const mostVisible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (mostVisible) {
+          setActiveIndex(Number(mostVisible.target.getAttribute("data-reel-index")));
+        }
       },
-      { threshold: 0.7 } // play only when 70% visible
+      { root: container, threshold: [0.5, 0.7] },
     );
 
-    videos?.forEach((v) => observer.observe(v));
+    container
+      .querySelectorAll<HTMLElement>("[data-reel-index]")
+      .forEach((panel) => observer.observe(panel));
+
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    const videos = containerRef.current?.querySelectorAll<HTMLVideoElement>("video");
+    videos?.forEach((video, index) => {
+      if (index !== activeIndex || document.hidden) {
+        video.pause();
+        return;
+      }
+
+      // Autoplay can be rejected by a browser; it should not surface as an
+      // unhandled promise rejection or prevent later reels from playing.
+      void video.play().catch(() => undefined);
+    });
+  }, [activeIndex, muted]);
+
+  useEffect(() => {
+    const pauseWhenHidden = () => {
+      if (document.hidden) {
+        containerRef.current?.querySelector<HTMLVideoElement>("video")?.pause();
+      }
+    };
+
+    document.addEventListener("visibilitychange", pauseWhenHidden);
+    return () => document.removeEventListener("visibilitychange", pauseWhenHidden);
+  }, []);
+
+  const toggleMuted = useCallback(() => setMuted((value) => !value), []);
 
   return (
     <section
       ref={containerRef}
-      className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory no-scrollbar text-white"
+      className="h-screen w-full overflow-y-scroll snap-y snap-mandatory bg-black text-white no-scrollbar"
     >
-      {reelsData.map((reel) => (
-        <div
-          key={reel.id}
-          className="relative h-screen w-full flex justify-center items-center snap-start"
-        >
-          {/* Video */}
-          <video
-            src={reel.videoUrl}
-            className="w-full h-full object-cover"
-            loop
-            muted
-            playsInline
-          />
+      {reelsData.map((reel, index) => {
+        // Keep only the current and adjacent videos attached to a source. It
+        // substantially reduces bandwidth and decode work for long reel lists.
+        const isNearActiveReel = Math.abs(index - activeIndex) <= 1;
 
-          {/* Mute Icon */}
-          <button className="absolute top-6 right-6 bg-black/50 p-2 rounded-full">
-            <Volume2 size={18} />
-          </button>
+        return (
+          <div
+            key={reel.id}
+            data-reel-index={index}
+            className="relative flex h-screen w-full snap-start items-center justify-center"
+          >
+            <video
+              src={isNearActiveReel ? reel.videoUrl : undefined}
+              className="h-full w-full object-cover"
+              loop
+              muted={muted}
+              playsInline
+              preload={index === activeIndex ? "auto" : "metadata"}
+            />
 
-          {/* Right Icons */}
-          <div className="absolute right-6 bottom-24 flex flex-col items-center gap-6 text-gray-200">
-            <button className="hover:text-red-500 transition">
-              <Heart size={28} />
-              <p className="text-xs mt-1">{reel.likes}</p>
+            <button
+              type="button"
+              onClick={toggleMuted}
+              aria-label={muted ? "Unmute reel" : "Mute reel"}
+              className="absolute right-6 top-6 rounded-full bg-black/50 p-2"
+            >
+              {muted ? <Volume2 size={18} /> : <VolumeX size={18} />}
             </button>
-            <button>
-              <MessageCircle size={28} />
-              <p className="text-xs mt-1">{reel.comments}</p>
-            </button>
-            <button>
-              <Bookmark size={26} />
-            </button>
-            <button>
-              <MoreVertical size={26} />
-            </button>
+
+            <div className="absolute bottom-24 right-6 flex flex-col items-center gap-6 text-gray-200">
+              <button type="button" aria-label={`Like ${reel.username}`} className="transition hover:text-red-500">
+                <Heart size={28} />
+                <p className="mt-1 text-xs">{reel.likes}</p>
+              </button>
+              <button type="button" aria-label={`View comments for ${reel.username}`}>
+                <MessageCircle size={28} />
+                <p className="mt-1 text-xs">{reel.comments}</p>
+              </button>
+              <button type="button" aria-label="Save reel"><Bookmark size={26} /></button>
+              <button type="button" aria-label="More reel options"><MoreVertical size={26} /></button>
+            </div>
+
+            <div className="absolute bottom-6 left-5 w-[85%] text-sm">
+              <p className="font-semibold">
+                @{reel.username} <span className="text-gray-400">· Follow</span>
+              </p>
+              <p className="mt-1">{reel.caption}</p>
+              <p className="mt-1 text-xs text-gray-400">
+                🎵 {reel.music}
+                {reel.collaborators.length > 0 && <> · {reel.collaborators.join(", ")}</>}
+              </p>
+            </div>
           </div>
-
-          {/* Bottom Caption */}
-          <div className="absolute bottom-6 left-5 w-[85%] text-sm">
-            <p className="font-semibold">
-              @{reel.username} <span className="text-gray-400">· Follow</span>
-            </p>
-            <p className="mt-1">{reel.caption}</p>
-            <p className="text-gray-400 text-xs mt-1">
-              🎵 {reel.music}
-              {reel.collaborators.length > 0 && (
-                <> · {reel.collaborators.join(", ")}</>
-              )}
-            </p>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </section>
   );
 };
