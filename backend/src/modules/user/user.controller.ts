@@ -38,7 +38,7 @@ export const getUserById = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await User.findById(id).select(publicUserFields);
+    const user = await User.findById(id).select(publicUserFields).lean();
 
     if (!user) {
       return res.status(404).json({
@@ -47,12 +47,12 @@ export const getUserById = async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       user,
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch {
+    return res.status(500).json({
       success: false,
       message: "Failed to fetch user",
     });
@@ -77,17 +77,33 @@ export const updateMe = async (req: Request, res: Response) => {
       }
     }
 
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields to update",
+      });
+    }
+
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
       runValidators: true,
-    }).select(publicUserFields);
+    })
+      .select(publicUserFields)
+      .lean();
 
-    res.json({
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.json({
       success: true,
       user,
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch {
+    return res.status(500).json({
       success: false,
       message: "Failed to update user",
     });
