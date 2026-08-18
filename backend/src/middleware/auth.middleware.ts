@@ -4,20 +4,34 @@ import User, { IUser } from "../modules/user/user.model.js";
 import { verifyToken } from "../utils/jwt.js";
 
 const AUTH_USER_FIELDS =
-  "_id username email fullName avatar bio isVerified createdAt updatedAt";
+  "_id username email fullName avatar bio isVerified createdAt";
+const BEARER_TOKEN_PATTERN = /^Bearer\s+(.+)$/i;
+
+type AuthenticatedUser = Pick<
+  IUser,
+  | "username"
+  | "email"
+  | "fullName"
+  | "avatar"
+  | "bio"
+  | "isVerified"
+  | "createdAt"
+> & {
+  _id: Types.ObjectId;
+};
 
 const unauthorized = (res: Response, message: string) =>
   res.status(401).json({ success: false, message });
 
 const getBearerToken = (authorization?: string): string | null => {
-  const match = authorization?.match(/^Bearer\s+(.+)$/i);
+  const match = authorization?.match(BEARER_TOKEN_PATTERN);
   return match?.[1].trim() || null;
 };
 
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser;
+      user?: AuthenticatedUser;
     }
   }
 }
@@ -42,7 +56,8 @@ export const protect = async (
 
     const user = await User.findById(decoded.id)
       .select(AUTH_USER_FIELDS)
-      .lean<IUser>();
+      .lean<AuthenticatedUser>()
+      .exec();
 
     if (!user) {
       return unauthorized(res, "Not authorized, user not found");
