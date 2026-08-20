@@ -1,40 +1,61 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import type { PropsWithChildren } from "react";
 
 interface ThemeContextType {
   darkMode: boolean;
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({
-  darkMode: false,
-  toggleTheme: () => {},
-});
+const THEME_STORAGE_KEY = "theme";
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+const getInitialDarkMode = () => {
+  if (typeof window === "undefined") return false;
+
+  try {
+    return window.localStorage.getItem(THEME_STORAGE_KEY) === "dark";
+  } catch {
+    return false;
+  }
+};
+
+export const ThemeProvider = ({
   children,
-}) => {
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem("theme");
-    return saved === "dark";
-  });
+}: PropsWithChildren) => {
+  const [darkMode, setDarkMode] = useState(getInitialDarkMode);
 
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+    document.documentElement.classList.toggle("dark", darkMode);
+
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, darkMode ? "dark" : "light");
+    } catch {
+      // Theme changes should still work when storage is unavailable.
     }
   }, [darkMode]);
 
-  const toggleTheme = () => setDarkMode((prev) => !prev);
+  const toggleTheme = useCallback(() => setDarkMode((current) => !current), []);
+  const value = useMemo(() => ({ darkMode, toggleTheme }), [darkMode, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 };
 
-export const useTheme = () => useContext(ThemeContext);
+export const useTheme = (): ThemeContextType => {
+  const context = useContext(ThemeContext);
+
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+
+  return context;
+};
